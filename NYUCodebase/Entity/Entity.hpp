@@ -15,9 +15,14 @@ class SheetSprite;
 class ShaderProgram;
 class Matrix;
 
+/*!
+ * @discussion A list of entity types
+ */
 enum EntityType {
-    ENTITY_PLAYER,
-    ENTITY_ENEMY
+    /// A player entity
+    ENTITY_PLAYER = 10,
+    /// An enemy entity
+    ENTITY_ENEMY = 20
 };
 
 class Entity {

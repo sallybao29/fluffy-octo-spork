@@ -1,11 +1,21 @@
 #ifndef GameUtilities_hpp
 #define GameUtilities_hpp
 
+#ifdef _WINDOWS
+#define RESOURCE_FOLDER ""
+#else
+#define RESOURCE_FOLDER "NYUCodebase.app/Contents/Resources/"
+#endif
+
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <string>
 #include <vector>
+#include <map>
+
+#define TILES 0
+#define OBJECTS 1
 
 class Matrix;
 class Vector3;
@@ -18,7 +28,8 @@ class Shape;
 enum GameMode {
     STATE_TITLE_SCREEN,
     STATE_GAME_LEVEL,
-    STATE_GAME_OVER };
+    STATE_GAME_OVER
+};
 
 void ProcessTitleScreenInput();
 void RenderTitleScreen();
@@ -82,6 +93,8 @@ extern bool done;
 extern const Uint8 *keys;
 
 extern GameMode mode;
+
+extern std::map<int, GLuint> textures;
 
 
 #endif

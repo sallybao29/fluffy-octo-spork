@@ -4,12 +4,6 @@
 #include <SDL_image.h>
 #include "GameState.hpp"
 
-#ifdef _WINDOWS
-#define RESOURCE_FOLDER ""
-#else
-#define RESOURCE_FOLDER "NYUCodebase.app/Contents/Resources/"
-#endif
-
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEPS 6
 
@@ -23,8 +17,9 @@ bool done = false;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 
 GameMode mode = STATE_GAME_LEVEL;
-FlareMap map(0.1f);
-GameState state;
+GameState state(&program);
+
+std::map<int, GLuint> textures;
 
 void ProcessEvents() {
     switch (mode) {
@@ -98,11 +93,15 @@ void Setup() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUseProgram(program.programID);
     
+    // Load textures
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_LINEAR);
-    map.Load(RESOURCE_FOLDER"Resources/Levels/level_1.txt");
-    map.SetSpriteSheet(tiles, 22, 12);
+    GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_LINEAR);
     
-    state.Initialize(&program, &map);
+    // Store texture references in lookup table
+    textures[TILES] = tiles;
+    textures[OBJECTS] = objects;
+    
+    state.Initialize();
 }
 
 int main(int argc, char *argv[])

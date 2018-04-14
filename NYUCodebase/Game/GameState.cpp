@@ -1,4 +1,5 @@
 #include <unordered_set>
+#include <sstream>
 #include "GameState.hpp"
 
 #define ACCELERATION 0.7f
@@ -7,14 +8,38 @@
 
 #define DELTA 0.00001f
 
-GameState::GameState() {}
+GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
 
-void GameState::Initialize(ShaderProgram* program, FlareMap* map) {
-    this->shader = program;
-    this->map = map;
+GameState::~GameState() {
+    delete map;
+}
+
+void GameState::Initialize() {
+    LoadLevel();
+}
+
+void GameState::LoadLevel() {
+    if (map != nullptr) {
+        delete map;
+    }
+    // Get the map for the level
+    std::stringstream stream;
+    stream << RESOURCE_FOLDER"Resources/Levels/level_" << level << ".txt";
+    
+    // Load a new map
+    map = new FlareMap(0.1f);
+    map->Load(stream.str());
+    map->SetSpriteSheet(textures[TILES], 22, 12);
 }
 
 void GameState::Reset() {
+    if (level == 1) {
+        // reset code here, don't need to reload the map
+    }
+    else {
+        level = 1;
+        LoadLevel();
+    }
 }
 
 void GameState::ProcessInput() {

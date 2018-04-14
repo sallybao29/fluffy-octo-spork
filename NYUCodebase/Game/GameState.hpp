@@ -11,8 +11,10 @@
 
 class GameState {
 public:
-    GameState();
-    void Initialize(ShaderProgram* program, FlareMap* map);
+    GameState(ShaderProgram* program);
+    ~GameState();
+    void Initialize();
+    void LoadLevel();
     void Reset();
     void ProcessInput();
     void Update(float elapsed);
@@ -27,6 +29,8 @@ private:
     
     Entity* player;
     std::vector<Entity> entities;
+    
+    int level;
 };
 
 #endif

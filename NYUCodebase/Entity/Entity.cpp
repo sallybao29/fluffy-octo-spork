@@ -6,7 +6,7 @@
 
 #define DELTA 0.00001f
 
-Entity::Entity(float x, float y, Shape& shape, EntityType type)
+Entity::Entity(float x, float y, const Shape& shape, EntityType type)
 : position(x, y, 0.0f), scale(1.0f, 1.0f, 1.0f), entityType(type) {
     this->shape = shape.Clone();
 }

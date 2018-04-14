@@ -65,7 +65,7 @@ void Rectangle::SetSize(float width, float height) {
     triangleVertices[11] = vertices[2].y;
 }
 
-Rectangle* Rectangle::Clone() {
+Rectangle* Rectangle::Clone() const {
     return new Rectangle(*this);
 }
 
@@ -102,7 +102,7 @@ void Triangle::SetSize(float width, float height) {
     triangleVertices[4] = vertices[2].y;
 }
 
-Triangle* Triangle::Clone() {
+Triangle* Triangle::Clone() const {
     return new Triangle(*this);
 }
 

@@ -35,7 +35,7 @@ public:
      * @discussion Dynamically creates a new shape based on the properties of this one
      * @return A dynamic clone of this shape
      */
-    virtual Shape* Clone() = 0;
+    virtual Shape* Clone() const = 0;
     virtual ~Shape();
 protected:
     /// The width and height of the shape
@@ -51,13 +51,13 @@ class Rectangle : public Shape {
 public:
     Rectangle(float width = 1.0f, float height = 1.0f);
     void SetSize(float width, float height) override;
-    Rectangle* Clone() override;
+    Rectangle* Clone() const override;
 };
 
 class Triangle : public Shape {
     Triangle(float width = 1.0f, float height = 1.0f);
     void SetSize(float width, float height) override;
-    Triangle* Clone() override;
+    Triangle* Clone() const override;
 };
 
 #endif

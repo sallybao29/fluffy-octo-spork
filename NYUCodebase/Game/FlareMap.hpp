@@ -52,9 +52,9 @@ public:
     void Render(ShaderProgram& shader);
     
     /*!
-     * @abstract Converts from world coordinates to tile coordinates
-     * @discussion Converts world coordinates to grid coordinates corresponding to the tilemap.
-     * Populates two floats that are passed in with the new coordinate values
+     * @abstract Converts world coordinates to tile coordinates
+     * @discussion Converts world coordinates to grid coordinates corresponding to the tilemap and
+     * populates two floats that are passed in with the new coordinate values
      * @param worldX The x coordinate in world space
      * @param worldY The y coordinate in world space
      * @param gridX The place to store the converted x coordinate
@@ -64,7 +64,11 @@ public:
     int worldToTileCoordX(float worldX) const ;
     int worldToTileCoordY(float worldY) const ;
     
-    /// The tile data
+    /*!
+     * @discussion Tile data is stored as integers starting from 1, which correspond to sprite indices
+     * on the spritesheet. Since spritesheet indices start at 1, there is an offset of one when indexing
+     * sprites. Blank tiles are represented by 0.
+     */
     unsigned int** mapData;
     /// The position and types of the entities in the map
     std::vector<FlareMapEntity> entities;

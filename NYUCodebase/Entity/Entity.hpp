@@ -27,6 +27,8 @@ enum EntityType {
 
 /*!
  * @discussion Represents an entity in a game
+ * @warning A copy constructor has not been implemented yet, so please don't ever make a copy
+ * of an entity.
  */
 class Entity {
 public:
@@ -49,8 +51,13 @@ public:
      * @param type The type of entity
      */
     Entity(float x, float y, SheetSprite *sprite, EntityType type);
+    
     ~Entity();
     
+    /*!
+     * @discussion Advances the entity's state by a certain amount of time. Resets contact flags
+     * @param elapsed The amount of time that has elapsed since the last update
+     */
     void Update(float elapsed);
     
     /*!
@@ -77,11 +84,19 @@ public:
     void SetColor(float r, float g, float b, float a);
     
     /*!
-     * @discussion Updates the entity's transformation matrix to reflect the most recent changes to position, scale, and rotation
+     * @discussion Updates the entity's transformation matrix to reflect the most recent changes to
+     * position, scale, and rotation
      */
     void UpdateMatrix();
+    
+    /*!
+     * @discussion Resolves collision between two entities if one occurs
+     * @param other The entity being collided against
+     * @return Whether the collision occurred
+     */
     bool CollidesWith(Entity& other);
     
+    /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
     
     /// The position of the entity in world coordinates

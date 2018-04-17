@@ -31,12 +31,6 @@ enum GameMode {
     STATE_GAME_OVER
 };
 
-void ProcessTitleScreenInput();
-void RenderTitleScreen();
-
-void ProcessGameOverScreenInput();
-void RenderGameOver();
-
 // Utility functions
 /*!
  * @discussion Loads a texture from a file
@@ -85,15 +79,20 @@ float lerp(float v0, float v1, float t);
 
 // Globals
 extern SDL_Window* displayWindow;
+/// The dimensions of the display window
 extern Vector3 windowSize;
+/// How far you can see in either direction
 extern Vector3 projection;
 
 extern SDL_Event event;
+/// Whether the game is done. Setting to true will close the window
 extern bool done;
+/// An array of key states which are valid for the entire duration of the application
 extern const Uint8 *keys;
 
 extern GameMode mode;
 
+/// Dictionary of textures loaded for the game
 extern std::map<int, GLuint> textures;
 
 

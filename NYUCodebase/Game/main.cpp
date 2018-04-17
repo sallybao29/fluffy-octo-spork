@@ -21,6 +21,33 @@ GameState state(&program);
 
 std::map<int, GLuint> textures;
 
+/*-------------------------------------------- Functions ---------------------------------------------*/
+
+void ProcessTitleScreenInput() {
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+            done = true;
+        }
+        else if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                mode = STATE_GAME_LEVEL;
+            }
+        }
+    }
+}
+
+void RenderTitleScreen() {
+    
+}
+
+void ProcessGameOverScreenInput() {
+    
+}
+
+void RenderGameOver() {
+    
+}
+
 void ProcessEvents() {
     switch (mode) {
         case STATE_TITLE_SCREEN:
@@ -82,9 +109,7 @@ void Setup() {
     Matrix projectionMatrix, viewMatrix;
     
     program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
-    projectionMatrix.SetOrthoProjection(-projection.x, projection.x,
-                                        -projection.y, projection.y,
-                                        -projection.z, projection.z);
+    projectionMatrix.SetOrthoProjection(-projection.x, projection.x, -projection.y, projection.y, -projection.z, projection.z);
     
     program.SetProjectionMatrix(projectionMatrix);
     program.SetViewMatrix(viewMatrix);

@@ -25,7 +25,7 @@ public:
     const std::vector<float> triangles() const;
     
     /*!
-     * @discussion Resizes the shape
+     * @discussion Resizes the shape. Recalculates the vertices.
      * @param width The new width of the shape
      * @param height The new height of the shape
      */

@@ -77,15 +77,6 @@ bool Entity::CollidesWith(Entity& other) {
         
         other.position.x -= penetration.first * 0.5f;
         other.position.y -= penetration.second * 0.5f;
-        
-        if (fabs(penetration.first) > fabs(penetration.second)) {
-            velocity.x *= -1;
-            other.velocity.x *= -1;
-        }
-        else {
-            velocity.y *= -1;
-            other.velocity.y *= -1;
-        }
     }
     
     return collided;

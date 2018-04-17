@@ -88,28 +88,3 @@ std::vector<std::pair<float, float>> ToWorldSpace(const Matrix& matrix, const st
 float lerp(float v0, float v1, float t) {
     return (1.0 - t) * v0 + t * v1;
 }
-
-void ProcessTitleScreenInput() {
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-            done = true;
-        }
-        else if (event.type == SDL_KEYDOWN) {
-            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-                mode = STATE_GAME_LEVEL;
-            }
-        }
-    }
-}
-
-void RenderTitleScreen() {
-    
-}
-
-void ProcessGameOverScreenInput() {
-    
-}
-
-void RenderGameOver() {
-    
-}

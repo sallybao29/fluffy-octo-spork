@@ -11,11 +11,55 @@
 GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
 
 GameState::~GameState() {
-    delete map;
+    if (map != nullptr) {
+        delete map;
+        map = nullptr;
+    }
+    for (size_t i = 0; i < entities.size(); i++) {
+        delete entities[i];
+    }
+    entities.clear();
 }
 
 void GameState::Initialize() {
     LoadLevel();
+    
+    // Create entities
+    for (int i = 0; i < map->entities.size(); i++) {
+        PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
+    }
+    
+    if (player == nullptr) {
+        assert(false);
+    }
+}
+
+void GameState::PlaceEntity(std::string type, float x, float y) {
+    // Generate subtexture name
+    std::stringstream subTextureName;
+    subTextureName << type << ".png";
+    
+    // Get sprite data from texture atlas
+    float spriteX, spriteY, width, height;
+    textureAtlas.GetSpriteData(subTextureName.str(), spriteX, spriteY, width, height);
+ 
+    // Create sprite from atlas data
+    SheetSprite* sprite = new SheetSprite(textures[OBJECTS], spriteX / 1024, spriteY / 1024, width / 1024, height / 1024, width / height, 0.3f);
+    
+    // Calculate entity position in world coordinates based on tile coordinates
+    float entityX = x * map->tileSize + map->tileSize / 2;
+    float entityY = y * -map->tileSize - map->tileSize / 2;
+    
+    // Determine the entity's type
+    // FIXUP: Find a less janky way of determining the entity type, preferably not by string parsing
+    EntityType entityType = strstr(type.data(), "player") != nullptr ? ENTITY_PLAYER : ENTITY_ENEMY;
+    // Create entity
+    Entity* entity = new Entity(entityX, entityY, sprite, entityType);
+    entities.push_back(entity);
+    
+    if (entityType == ENTITY_PLAYER) {
+        player = entity;
+    }
 }
 
 void GameState::LoadLevel() {
@@ -27,7 +71,7 @@ void GameState::LoadLevel() {
     stream << RESOURCE_FOLDER"Resources/Levels/level_" << level << ".txt";
     
     // Load a new map
-    map = new FlareMap(0.1f);
+    map = new FlareMap(0.3f);
     map->Load(stream.str());
     map->SetSpriteSheet(textures[TILES], 22, 12);
 }
@@ -56,9 +100,33 @@ void GameState::Update(float elapsed) {
 void GameState::Render() {
     modelMatrix.Identity();
     shader->SetModelMatrix(modelMatrix);
+    
+    // Calculate bounds of scrolling
+    float viewX = player->position.x;
+    float viewY = -(map->mapHeight * map->tileSize - projection.y);
+    
+    // Bound left scrolling to left end of the map
+    if (viewX - projection.x <= 0) {
+        viewX = projection.x;
+    }
+    
+    // Bound right scrolling to right end of the map
+    if (viewX + projection.x >= map->mapWidth * map->tileSize) {
+        viewX = map->mapWidth * map->tileSize - projection.x;
+    }
+    
+    // Set view matrix to follow player
+    viewMatrix.Identity();
+    viewMatrix.Translate(-viewX, -viewY, 0.0f);
+    shader->SetViewMatrix(viewMatrix);
 
     // Draw map
     map->Render(*shader);
+    
+    // Draw entities
+    for (size_t i = 0; i < entities.size(); i++) {
+        entities[i]->Render(*shader);
+    }
 }
 
 

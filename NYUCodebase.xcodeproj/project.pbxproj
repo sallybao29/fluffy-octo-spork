@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */; };
 		4898130A20803B5200D9B749 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4898130820803B5200D9B749 /* Vector3.cpp */; };
 		4898131020803E5900D9B749 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4898130F20803E5900D9B749 /* Resources */; };
 		48D414AC2062DC8100FC4896 /* GameState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D414AA2062DC8100FC4896 /* GameState.cpp */; };
@@ -33,6 +34,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		484BEC0220898CD000B8CA79 /* rapidxml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml.hpp; sourceTree = "<group>"; };
+		484BEC0420898E8900B8CA79 /* rapidxml_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rapidxml_utils.hpp; path = NYUCodebase/rapidxml_utils.hpp; sourceTree = SOURCE_ROOT; };
+		484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextureAtlasParser.cpp; sourceTree = "<group>"; };
+		484BEC062089A3AD00B8CA79 /* TextureAtlasParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextureAtlasParser.hpp; sourceTree = "<group>"; };
 		4898130820803B5200D9B749 /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector3.cpp; sourceTree = "<group>"; };
 		4898130920803B5200D9B749 /* Vector3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vector3.hpp; sourceTree = "<group>"; };
 		4898130E20803DDA00D9B749 /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
@@ -91,6 +96,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		484BEC0320898E7500B8CA79 /* XMLParser */ = {
+			isa = PBXGroup;
+			children = (
+				484BEC0420898E8900B8CA79 /* rapidxml_utils.hpp */,
+				484BEC0220898CD000B8CA79 /* rapidxml.hpp */,
+				484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */,
+				484BEC062089A3AD00B8CA79 /* TextureAtlasParser.hpp */,
+			);
+			path = XMLParser;
+			sourceTree = "<group>";
+		};
 		4898130B20803C1200D9B749 /* ShaderProgram */ = {
 			isa = PBXGroup;
 			children = (
@@ -115,7 +131,6 @@
 				48D414AB2062DC8100FC4896 /* GameState.hpp */,
 				48D414B02063044100FC4896 /* GameUtilities.cpp */,
 				48D414B12063044100FC4896 /* GameUtilities.hpp */,
-				6D5A86B919AE5C710066C1FD /* main.cpp */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -214,9 +229,11 @@
 		6D5A86E119AE5CAA0066C1FD /* Code */ = {
 			isa = PBXGroup;
 			children = (
+				484BEC0320898E7500B8CA79 /* XMLParser */,
 				4898130D20803CE800D9B749 /* Entity */,
 				4898130C20803CAB00D9B749 /* Game */,
 				48FAC7A4207EBB2E0081078D /* SatCollision.cpp */,
+				6D5A86B919AE5C710066C1FD /* main.cpp */,
 				48FAC7A5207EBB2E0081078D /* SatCollision.h */,
 				4898130B20803C1200D9B749 /* ShaderProgram */,
 				4898130E20803DDA00D9B749 /* stb_image.h */,
@@ -307,6 +324,7 @@
 				48D414AC2062DC8100FC4896 /* GameState.cpp in Sources */,
 				6DEF23C21B96CC2600BCE792 /* Matrix.cpp in Sources */,
 				6D5A86BA19AE5C710066C1FD /* main.cpp in Sources */,
+				484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */,
 				48FAC7A3207EBB110081078D /* Shape.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -14,13 +14,20 @@ Entity::Entity(float x, float y, const Shape& shape, EntityType type)
 Entity::Entity(float x, float y, SheetSprite *sprite, EntityType type)
 : position(x, y, 0.0f), scale(1.0f, 1.0f, 1.0f), sprite(sprite), entityType(type) {
     
-    shape = new Rectangle(sprite->aspect * sprite->size, sprite->size);
+    this->shape = new Rectangle(sprite->aspect * sprite->size, sprite->size);
 }
 
 Entity::Entity() {}
 
 Entity::~Entity() {
-    delete shape;
+    if (shape != nullptr) {
+        delete shape;
+        shape = nullptr;
+    }
+    if (sprite != nullptr) {
+        delete sprite;
+        sprite = nullptr;
+    }
 }
 
 void Entity::SetSprite(SheetSprite* newSprite) {

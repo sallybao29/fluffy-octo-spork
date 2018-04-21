@@ -20,9 +20,9 @@ class Matrix;
  */
 enum EntityType {
     /// A player entity
-    ENTITY_PLAYER = 10,
+    ENTITY_PLAYER,
     /// An enemy entity
-    ENTITY_ENEMY = 20
+    ENTITY_ENEMY
 };
 
 /*!

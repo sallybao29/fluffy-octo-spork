@@ -46,7 +46,9 @@ public:
      */
     void Render();
     
-private:    
+private:
+    void PlaceEntity(std::string type, float x, float y);
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;
@@ -54,7 +56,7 @@ private:
     FlareMap* map;
     
     Entity* player;
-    std::vector<Entity> entities;
+    std::vector<Entity*> entities;
     
     int level;
 };

@@ -21,6 +21,8 @@ GameState state(&program);
 
 std::map<int, GLuint> textures;
 
+TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.xml");
+
 /*-------------------------------------------- Functions ---------------------------------------------*/
 
 void ProcessTitleScreenInput() {
@@ -126,6 +128,7 @@ void Setup() {
     textures[TILES] = tiles;
     textures[OBJECTS] = objects;
     
+    // Initialize the game state
     state.Initialize();
 }
 

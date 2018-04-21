@@ -36,7 +36,7 @@ public:
      * @return A dynamic clone of this shape
      */
     virtual Shape* Clone() const = 0;
-    virtual ~Shape();
+    virtual ~Shape() {}
 protected:
     /// The width and height of the shape
     Vector3 size;
@@ -52,12 +52,14 @@ public:
     Rectangle(float width = 1.0f, float height = 1.0f);
     void SetSize(float width, float height) override;
     Rectangle* Clone() const override;
+    ~Rectangle() {}
 };
 
 class Triangle : public Shape {
     Triangle(float width = 1.0f, float height = 1.0f);
     void SetSize(float width, float height) override;
     Triangle* Clone() const override;
+    ~Triangle() {}
 };
 
 #endif

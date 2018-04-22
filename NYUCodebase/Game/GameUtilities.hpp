@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "TextureAtlasParser.hpp"
 
 #define TILES 0
 #define OBJECTS 1
@@ -23,7 +24,7 @@ class ShaderProgram;
 class Shape;
 
 /*!
- * @discussion A list of game modes
+ * @discussion A list of game modes that determine the current state of the game
  */
 enum GameMode {
     STATE_TITLE_SCREEN,
@@ -83,7 +84,7 @@ extern SDL_Window* displayWindow;
 extern Vector3 windowSize;
 /// How far you can see in either direction
 extern Vector3 projection;
-
+/// To be polled for user triggered events
 extern SDL_Event event;
 /// Whether the game is done. Setting to true will close the window
 extern bool done;
@@ -94,6 +95,8 @@ extern GameMode mode;
 
 /// Dictionary of textures loaded for the game
 extern std::map<int, GLuint> textures;
+
+extern TextureAtlasParser textureAtlas;
 
 
 #endif

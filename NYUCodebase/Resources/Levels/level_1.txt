@@ -33,3 +33,23 @@ data=
 111,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,
 67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67
 
+[ObjectsLayer]
+# playerBlue_stand
+type=playerBlue_stand
+location=1,11,1,1
+
+[ObjectsLayer]
+# enemySpikey_1
+type=enemySpikey_1
+location=23,14,1,1
+
+[ObjectsLayer]
+# enemyFlying_1
+type=enemyFlying_1
+location=7,8,1,1
+
+[ObjectsLayer]
+# enemyFloating_1
+type=enemyFloating_1
+location=12,11,1,1
+

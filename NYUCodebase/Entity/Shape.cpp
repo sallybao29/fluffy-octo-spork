@@ -15,8 +15,6 @@ void Shape::SetSize(float width, float height) {
     size.y = height;
 }
 
-Shape::~Shape() {}
-
 /*----------------------------------- Rectangle --------------------------------------*/
 Rectangle::Rectangle(float width, float height) : Shape(width, height) {
     // Set vertices of each corner

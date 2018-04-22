@@ -32,14 +32,21 @@ public:
      * Value will be 0 if the timer is not running.
      * @return The amount of time that has elapsed
      */
-    float getTime() const;
+    float getElapsed() const;
     
     /*!
      * @discussion Reset the timer
      */
     void reset();
+    
+    /*!
+     * @discussion Stop the timer
+     */
+    void stop();
+    
 private:
     float beg;
+    float end;
     bool running;
 };
 

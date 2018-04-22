@@ -5,6 +5,7 @@
 #include "Vector3.hpp"
 #include "Shape.hpp"
 #include "SheetSprite.hpp"
+#include "SpriteAnimation.hpp"
 
 #define RED 0
 #define GREEN 1
@@ -98,6 +99,8 @@ public:
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
+    
+    SpriteAnimation* animation;
     
     /// The position of the entity in world coordinates
     Vector3 position;

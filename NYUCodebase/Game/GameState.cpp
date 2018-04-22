@@ -35,6 +35,7 @@ void GameState::Initialize() {
 }
 
 void GameState::PlaceEntity(std::string type, float x, float y) {
+    /*
     // Generate subtexture name
     std::stringstream subTextureName;
     subTextureName << type << ".png";
@@ -60,6 +61,32 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     if (entityType == ENTITY_PLAYER) {
         player = entity;
     }
+     */
+    
+    EntityType entityType = strstr(type.data(), "player") != nullptr ? ENTITY_PLAYER : ENTITY_ENEMY;
+    if (entityType == ENTITY_PLAYER) {
+        std::stringstream subTextureName;
+        std::vector<float> spriteData;
+        for (int i = 0; i < 3; i++) {
+            subTextureName.str("");
+            subTextureName << type << i + 1 << ".png";
+            float spriteX, spriteY, width, height;
+            textureAtlas.GetSpriteData(subTextureName.str(), spriteX, spriteY, width, height);
+            spriteData.insert(spriteData.end(), {
+                spriteX, spriteY, width, height
+            });
+        }
+       
+        float entityX = x * map->tileSize + map->tileSize / 2;
+        float entityY = y * -map->tileSize - map->tileSize / 2;
+        
+        entities.push_back(new Entity(entityX, entityY, Rectangle(0.3, 0.3), ENTITY_PLAYER));
+        entities.back()->animation = new SpriteAnimation(textures[OBJECTS], spriteData,
+                                                         1024, 1024, map->tileSize, LOOP_REVERSE);
+        player = entities.back();
+        player->animation->SetSpeed(30);
+    }
+    
 }
 
 void GameState::LoadLevel() {
@@ -92,9 +119,20 @@ void GameState::ProcessInput() {
             done = true;
         }
     }
+    
+    if (keys[SDL_SCANCODE_RIGHT]) {
+        player->velocity.x = 0.3f;
+    }
+    else if (keys[SDL_SCANCODE_LEFT]) {
+        player->velocity.x = -0.3f;
+    }
+    else {
+        player->velocity.x = 0.0f;
+    }
 }
 
 void GameState::Update(float elapsed) {
+    player->Update(elapsed);
 }
 
 void GameState::Render() {
@@ -123,10 +161,12 @@ void GameState::Render() {
     // Draw map
     map->Render(*shader);
     
+    /*
     // Draw entities
     for (size_t i = 0; i < entities.size(); i++) {
         entities[i]->Render(*shader);
-    }
+    }*/
+    player->Render(*shader);
 }
 
 

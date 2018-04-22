@@ -21,25 +21,26 @@ enum LoopConvention {
 
 class SpriteAnimation {
 public:
-    SpriteAnimation(GLuint textureID, const std::vector<int>& data,
-                    size_t sheetWidth, size_t sheetHeight, size_t spriteSize,
+    SpriteAnimation(GLuint textureID, const std::vector<float>& data,
+                    size_t sheetWidth, size_t sheetHeight, float spriteSize,
                     LoopConvention loopStyle = LOOP_NONE);
     
     ~SpriteAnimation();
-    const SheetSprite* GetCurrentFrame() const;
-    void NextFrame();
+    SheetSprite* GetCurrentFrame();
+    void NextFrame(float elapsed);
+    void SetSpeed(float fps);
+    void Stop();
     
 private:
     std::vector<SheetSprite> frames;
     GLuint textureID;
     int frameIndex;
     size_t maxFrames;
-    
-    bool loop;
+
     LoopConvention loopStyle;
     int deltaFrame;
     
-    Timer timer;
+    float accumulator;
     float framesPerSecond;
 };
 

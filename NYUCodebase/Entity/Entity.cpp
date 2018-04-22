@@ -23,11 +23,11 @@ Entity::~Entity() {
     if (shape != nullptr) {
         delete shape;
         shape = nullptr;
-    }
+    }/*
     if (sprite != nullptr) {
         delete sprite;
         sprite = nullptr;
-    }
+    }*/
 }
 
 void Entity::SetSprite(SheetSprite* newSprite) {
@@ -66,6 +66,21 @@ void Entity::Update(float elapsed) {
     collidedLeft = false;
     collidedRight = false;
     collidedBottom = false;
+    
+    position.x += velocity.x * elapsed;
+    position.y += velocity.y * elapsed;
+    
+    SheetSprite* frame = animation->GetCurrentFrame();
+    if (frame != sprite) {
+         SetSprite(frame);
+    }
+
+    if (fabs(velocity.x) == 0) {
+        animation->Stop();
+    }
+    else {
+        animation->NextFrame(fabs(velocity.x) * elapsed);
+    }
 }
 
 bool Entity::CollidesWith(Entity& other) {

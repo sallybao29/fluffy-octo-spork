@@ -35,7 +35,7 @@ public:
      */
     bool GetSpriteData(const std::string& name, float& x, float& y, float& width, float& height) const;
     
-    bool GetSpritesData(const std::string& name, std::vector<float>& spriteData) const;
+    bool GetSpritesData(const std::string& name, std::vector<float>& spriteData, int maxSprites = -1) const;
     
 private:
     /// The file containing the xml texture atlas data. Must persist for as long as doc is being used

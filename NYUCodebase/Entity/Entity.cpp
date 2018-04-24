@@ -14,7 +14,7 @@ Entity::Entity(float x, float y, const Shape& shape, EntityType type)
 Entity::Entity(float x, float y, SheetSprite *sprite, EntityType type)
 : position(x, y, 0.0f), scale(1.0f, 1.0f, 1.0f), sprite(sprite), entityType(type) {
     
-    this->shape = new Rectangle(sprite->aspect * sprite->size, sprite->size);
+    this->shape = new Rectangle(sprite->width * sprite->size, sprite->height * sprite->size);
 }
 
 Entity::Entity() {}
@@ -28,7 +28,7 @@ Entity::~Entity() {
 
 void Entity::SetSprite(SheetSprite* newSprite) {
     sprite = newSprite;
-    shape->SetSize(sprite->aspect * sprite->size, sprite->size);
+    shape->SetSize(sprite->width * sprite->size, sprite->height * sprite->size);
 }
 
 void Entity::UpdateMatrix() {
@@ -108,12 +108,13 @@ void Entity::SetColor(float r, float g, float b, float a) {
     color[ALPHA] = a;
 }
 
-bool Entity::AddAnimation(EntityAction action, const std::string textureName, LoopConvention loopStyle) {
+bool Entity::AddAnimation(EntityAction action, const std::string textureName, float spriteSize,
+                          LoopConvention loopStyle, int maxFrames) {
     std::vector<float> spriteData;
     
-    bool found = textureAtlas.GetSpritesData(textureName, spriteData);
+    bool found = textureAtlas.GetSpritesData(textureName, spriteData, maxFrames);
     animations[action] = new SpriteAnimation(textures[OBJECTS], spriteData,
-                                            1024, 1024, map->tileSize, loopStyle);
+                                            1024, 1024, spriteSize, loopStyle);
     return found;
 }
 

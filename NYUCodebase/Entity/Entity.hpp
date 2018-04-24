@@ -111,14 +111,15 @@ public:
      */
     bool CollidesWith(Entity& other);
     
-    bool AddAnimation(EntityAction action, const std::string textureName, LoopConvention loopStyle);
-    
-    FlareMap* map;
+    bool AddAnimation(EntityAction action, const std::string textureName, float spriteSize,
+                      LoopConvention loopStyle, int maxFrames = -1);
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
     
     std::map<EntityAction, SpriteAnimation*> animations;
+    
+    EntityAction previousAction;
     
     EntityAction currentAction;
     

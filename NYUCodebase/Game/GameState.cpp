@@ -39,19 +39,27 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
     Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-    entity->map = map;
-    
     entities.push_back(entity);
     
     // Player entity
     if (strcmp(type.data(), "Player") == 0) {
         player = entities.back();
+        player->previousAction = ACTION_WALKING;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
         
-        player->AddAnimation(ACTION_WALKING, "playerBlue_walk", LOOP_REVERSE);
+        // Add animations
+        // Walking
+        player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
         player->animations[ACTION_WALKING]->SetSpeed(25);
-        player->AddAnimation(ACTION_DEFENDING, "playerBlue_roll", LOOP_NONE);
+        // Defending
+        player->AddAnimation(ACTION_DEFENDING, "playerBlue_roll", 3, LOOP_NONE);
+        // Swimming
+        player->AddAnimation(ACTION_SWIMMING, "playerBlue_swim", 3, LOOP_REPEAT);
+        player->animations[ACTION_SWIMMING]->SetSpeed(25);
+        // Jumping
+        player->AddAnimation(ACTION_JUMPING, "playerBlue_up", 3, LOOP_ONCE);
+        player->animations[ACTION_JUMPING]->SetSpeed(30);
     }
 }
 
@@ -84,6 +92,19 @@ void GameState::ProcessInput() {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
             done = true;
         }
+        else if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+                player->previousAction = player->currentAction;
+                player->currentAction = ACTION_JUMPING;
+                player->velocity.y = 1.0f;
+            }
+        }
+        else if (event.type == SDL_KEYUP) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                player->currentAction = player->previousAction;
+                player->previousAction = ACTION_DEFENDING;
+            }
+        }
     }
     
     if (keys[SDL_SCANCODE_RIGHT]) {
@@ -94,6 +115,12 @@ void GameState::ProcessInput() {
     }
     else {
         player->velocity.x = 0.0f;
+    }
+    if (keys[SDL_SCANCODE_SPACE]) {
+        if (player->currentAction != ACTION_DEFENDING) {
+            player->previousAction = player->currentAction;
+            player->currentAction = ACTION_DEFENDING;
+        }
     }
 }
 

@@ -39,7 +39,7 @@ bool TextureAtlasParser::GetSpriteData(const std::string& name, float& x, float&
     return true;
 }
 
-bool TextureAtlasParser::GetSpritesData(const std::string& name, std::vector<float>& spriteData) const {
+bool TextureAtlasParser::GetSpritesData(const std::string& name, std::vector<float>& spriteData, int maxSprites) const {
     const rapidxml::xml_node<>* subTexture = GetSubTexture("name", name);
     if (subTexture == nullptr) {
         return false;
@@ -57,6 +57,11 @@ bool TextureAtlasParser::GetSpritesData(const std::string& name, std::vector<flo
         width = strtof(texNode->first_attribute("width")->value(), nullptr);
         height = strtof(texNode->first_attribute("height")->value(), nullptr);
         spriteData.insert(spriteData.end(), { x, y, width, height });
+        
+        maxSprites--;
+        if (maxSprites == 0) {
+            return true;
+        }
     }
     
     return true;

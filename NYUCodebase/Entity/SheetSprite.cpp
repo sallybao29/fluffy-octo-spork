@@ -1,11 +1,11 @@
 #include "ShaderProgram.h"
 #include "SheetSprite.hpp"
 
-SheetSprite::SheetSprite(unsigned int textureID, float u, float v, float width, float height, float aspect, float size)
-: textureID(textureID), u(u), v(v), width(width), height(height), size(size), aspect(aspect), reversed(false) {}
+SheetSprite::SheetSprite(unsigned int textureID, float u, float v, float width, float height, float size)
+: textureID(textureID), u(u), v(v), width(width), height(height), size(size), reversed(false) {}
 
-SheetSprite::SheetSprite(unsigned int textureID, int index, int spriteCountX, int spriteCountY, float aspect, float size)
-: textureID(textureID), size(size), aspect(aspect), reversed(false) {
+SheetSprite::SheetSprite(unsigned int textureID, int index, int spriteCountX, int spriteCountY, float size)
+: textureID(textureID), size(size), reversed(false) {
     u = (float)(index % spriteCountX) / (float) spriteCountX;
     v = ((float)index / spriteCountX) / (float) spriteCountY;
     width = 1.0/(float)spriteCountX;
@@ -23,17 +23,18 @@ void SheetSprite::Render(ShaderProgram& program) const {
         u + width, v + height
     };
     
-    float aspect = this->aspect;
+    float width = this->width;
     if (reversed) {
-        aspect *= -1;
+        width *= -1;
     }
     float vertices[] = {
-        -0.5f * size * aspect, -0.5f * size,
-        0.5f * size * aspect, 0.5f * size,
-        -0.5f * size * aspect, 0.5f * size,
-        0.5f * size * aspect, 0.5f * size,
-        -0.5f * size * aspect, -0.5f * size,
-        0.5f * size * aspect, -0.5f * size};
+        -size * width, -size * height,
+        size * width, size * height,
+        -size * width, size * height,
+        size * width, size * height,
+        -size * width, -size * height,
+        size * width, -size * height
+    };
     
     glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
     glEnableVertexAttribArray(program.positionAttribute);

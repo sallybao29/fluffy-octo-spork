@@ -16,9 +16,8 @@ SpriteAnimation::SpriteAnimation(GLuint textureID, const std::vector<float>& dat
         float v = data[i+1] / (float) sheetHeight;
         float width = data[i+2] / (float) sheetWidth;
         float height = data[i+3] / (float) sheetHeight;
-        float aspect = data[i+2] / data[i+3];
         
-        frames.emplace_back(textureID, u, v, width, height, aspect, spriteSize);
+        frames.emplace_back(textureID, u, v, width, height, spriteSize);
     }
 }
 

@@ -8,15 +8,17 @@
 #include "Timer.hpp"
 
 /*!
- * @discussion Describes how the animation loops
+ * @discussion Describes how the animation runs
  */
 enum LoopConvention {
     /// Loop from the start once the last frame is reached
     LOOP_REPEAT,
     /// Reverse the loop direction once the first or last frame is reached
     LOOP_REVERSE,
-    /// Don't loop 
-    LOOP_NONE
+    /// Don't run. For single still sprites
+    LOOP_NONE,
+    /// Run once and stop
+    LOOP_ONCE
 };
 
 class SpriteAnimation {
@@ -25,11 +27,11 @@ public:
                     size_t sheetWidth, size_t sheetHeight, float spriteSize,
                     LoopConvention loopStyle = LOOP_NONE);
     
-    ~SpriteAnimation();
     SheetSprite* GetCurrentFrame();
     void NextFrame(float elapsed);
     void SetSpeed(float fps);
     void Stop();
+    void Reset();
     
 private:
     std::vector<SheetSprite> frames;

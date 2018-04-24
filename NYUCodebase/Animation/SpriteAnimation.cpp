@@ -34,15 +34,23 @@ void SpriteAnimation::Stop() {
     accumulator = 0;
 }
 
+void SpriteAnimation::Reset() {
+    accumulator = 0;
+    frameIndex = 0;
+}
+
 void SpriteAnimation::NextFrame(float elapsed) {
+    if (loopStyle == LOOP_NONE) return;
+    
     accumulator += elapsed;
     
     if (accumulator > 1 / (float) framesPerSecond) {
         switch (loopStyle) {
-            case LOOP_NONE:
+            case LOOP_ONCE:
                 if (frameIndex < maxFrames - 1) {
                     frameIndex += deltaFrame;
                 }
+                break;
             case LOOP_REPEAT:
                 frameIndex = (frameIndex + deltaFrame) % maxFrames;
                 break;

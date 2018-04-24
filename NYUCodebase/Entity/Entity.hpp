@@ -2,10 +2,12 @@
 #define Entity_hpp
 
 #include <stdio.h>
+#include <map>
 #include "Vector3.hpp"
 #include "Shape.hpp"
 #include "SheetSprite.hpp"
 #include "SpriteAnimation.hpp"
+#include "FlareMap.hpp"
 
 #define RED 0
 #define GREEN 1
@@ -22,8 +24,20 @@ class Matrix;
 enum EntityType {
     /// A player entity
     ENTITY_PLAYER,
-    /// An enemy entity
-    ENTITY_ENEMY
+    // Enemy entities
+    ENTITY_FLYING,
+    ENTITY_WALKING,
+    ENTITY_SWIMMING,
+    ENTITY_SPIKEY,
+    ENTITY_NONE
+};
+
+enum EntityAction {
+    ACTION_WALKING,
+    ACTION_JUMPING,
+    ACTION_DEFENDING,
+    ACTION_SWIMMING,
+    ACTION_ATTACKING
 };
 
 /*!
@@ -42,7 +56,7 @@ public:
      * @param shape The shape of the entity's hit "box"
      * @param type The type of entity
      */
-    Entity(float x, float y, const Shape& shape, EntityType type);
+    Entity(float x, float y, const Shape& shape, EntityType type = ENTITY_NONE);
     
     /*!
      * @discussion Intializes a textured entity with the given position, sprite, and type
@@ -51,7 +65,7 @@ public:
      * @param sprite The sprite to render for the entity
      * @param type The type of entity
      */
-    Entity(float x, float y, SheetSprite *sprite, EntityType type);
+    Entity(float x, float y, SheetSprite *sprite, EntityType type = ENTITY_NONE);
     
     ~Entity();
     
@@ -97,10 +111,16 @@ public:
      */
     bool CollidesWith(Entity& other);
     
+    bool AddAnimation(EntityAction action, const std::string textureName, LoopConvention loopStyle);
+    
+    FlareMap* map;
+    
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
     
-    SpriteAnimation* animation;
+    std::map<EntityAction, SpriteAnimation*> animations;
+    
+    EntityAction currentAction;
     
     /// The position of the entity in world coordinates
     Vector3 position;

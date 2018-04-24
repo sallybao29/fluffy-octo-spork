@@ -34,8 +34,8 @@ data=
 67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67,67
 
 [ObjectsLayer]
-# playerBlue_walk
-type=playerBlue_walk
+# playerBlue
+type=Player
 location=1,11,1,1
 
 [ObjectsLayer]

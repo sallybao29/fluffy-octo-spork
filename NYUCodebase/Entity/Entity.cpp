@@ -23,11 +23,7 @@ Entity::~Entity() {
     if (shape != nullptr) {
         delete shape;
         shape = nullptr;
-    }/*
-    if (sprite != nullptr) {
-        delete sprite;
-        sprite = nullptr;
-    }*/
+    }
 }
 
 void Entity::SetSprite(SheetSprite* newSprite) {
@@ -70,16 +66,17 @@ void Entity::Update(float elapsed) {
     position.x += velocity.x * elapsed;
     position.y += velocity.y * elapsed;
     
-    SheetSprite* frame = animation->GetCurrentFrame();
+    SheetSprite* frame = animations[currentAction]->GetCurrentFrame();
     if (frame != sprite) {
          SetSprite(frame);
     }
 
     if (fabs(velocity.x) == 0) {
-        animation->Stop();
+        //animations[currentAction]->Stop();
+        animations[currentAction]->Reset();
     }
     else {
-        animation->NextFrame(fabs(velocity.x) * elapsed);
+        animations[currentAction]->NextFrame(fabs(velocity.x) * elapsed);
     }
 }
 
@@ -109,5 +106,14 @@ void Entity::SetColor(float r, float g, float b, float a) {
     color[GREEN] = g;
     color[BLUE] = b;
     color[ALPHA] = a;
+}
+
+bool Entity::AddAnimation(EntityAction action, const std::string textureName, LoopConvention loopStyle) {
+    std::vector<float> spriteData;
+    
+    bool found = textureAtlas.GetSpritesData(textureName, spriteData);
+    animations[action] = new SpriteAnimation(textures[OBJECTS], spriteData,
+                                            1024, 1024, map->tileSize, loopStyle);
+    return found;
 }
 

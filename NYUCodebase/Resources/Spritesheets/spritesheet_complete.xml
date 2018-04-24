@@ -164,8 +164,6 @@
 	<SubTexture name="playerBlue_walk1.png"	x="759"	y="812"	width="45"	height="54" frameX="-0" frameY="-0" frameWidth="45" frameHeight="54"/>
 	<SubTexture name="playerBlue_walk2.png"	x="760"	y="380"	width="45"	height="54" frameX="-0" frameY="-0" frameWidth="45" frameHeight="54"/>
 	<SubTexture name="playerBlue_walk3.png"	x="759"	y="503"	width="45"	height="52" frameX="-0" frameY="-0" frameWidth="45" frameHeight="52"/>
-	<SubTexture name="playerBlue_walk4.png"	x="713"	y="157"	width="49"	height="45" frameX="-0" frameY="-0" frameWidth="49" frameHeight="45"/>
-	<SubTexture name="playerBlue_walk5.png"	x="585"	y="779"	width="64"	height="40" frameX="-0" frameY="-0" frameWidth="64" frameHeight="40"/>
 	<SubTexture name="playerGreen_dead.png"	x="890"	y="272"	width="38"	height="43" frameX="-0" frameY="-0" frameWidth="38" frameHeight="43"/>
 	<SubTexture name="playerGreen_duck.png"	x="650"	y="573"	width="56"	height="31" frameX="-0" frameY="-0" frameWidth="56" frameHeight="31"/>
 	<SubTexture name="playerGreen_fall.png"	x="890"	y="316"	width="38"	height="49" frameX="-0" frameY="-0" frameWidth="38" frameHeight="49"/>

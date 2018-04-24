@@ -35,58 +35,24 @@ void GameState::Initialize() {
 }
 
 void GameState::PlaceEntity(std::string type, float x, float y) {
-    /*
-    // Generate subtexture name
-    std::stringstream subTextureName;
-    subTextureName << type << ".png";
-    
-    // Get sprite data from texture atlas
-    float spriteX, spriteY, width, height;
-    textureAtlas.GetSpriteData(subTextureName.str(), spriteX, spriteY, width, height);
- 
-    // Create sprite from atlas data
-    SheetSprite* sprite = new SheetSprite(textures[OBJECTS], spriteX / 1024, spriteY / 1024, width / 1024, height / 1024, width / height, 0.3f);
-    
-    // Calculate entity position in world coordinates based on tile coordinates
     float entityX = x * map->tileSize + map->tileSize / 2;
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
-    // Determine the entity's type
-    // FIXUP: Find a less janky way of determining the entity type, preferably not by string parsing
-    EntityType entityType = strstr(type.data(), "player") != nullptr ? ENTITY_PLAYER : ENTITY_ENEMY;
-    // Create entity
-    Entity* entity = new Entity(entityX, entityY, sprite, entityType);
+    Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+    entity->map = map;
+    
     entities.push_back(entity);
     
-    if (entityType == ENTITY_PLAYER) {
-        player = entity;
-    }
-     */
-    
-    EntityType entityType = strstr(type.data(), "player") != nullptr ? ENTITY_PLAYER : ENTITY_ENEMY;
-    if (entityType == ENTITY_PLAYER) {
-        std::stringstream subTextureName;
-        std::vector<float> spriteData;
-        for (int i = 0; i < 3; i++) {
-            subTextureName.str("");
-            subTextureName << type << i + 1 << ".png";
-            float spriteX, spriteY, width, height;
-            textureAtlas.GetSpriteData(subTextureName.str(), spriteX, spriteY, width, height);
-            spriteData.insert(spriteData.end(), {
-                spriteX, spriteY, width, height
-            });
-        }
-       
-        float entityX = x * map->tileSize + map->tileSize / 2;
-        float entityY = y * -map->tileSize - map->tileSize / 2;
-        
-        entities.push_back(new Entity(entityX, entityY, Rectangle(0.3, 0.3), ENTITY_PLAYER));
-        entities.back()->animation = new SpriteAnimation(textures[OBJECTS], spriteData,
-                                                         1024, 1024, map->tileSize, LOOP_REVERSE);
+    // Player entity
+    if (strcmp(type.data(), "Player") == 0) {
         player = entities.back();
-        player->animation->SetSpeed(30);
+        player->currentAction = ACTION_WALKING;
+        player->entityType = ENTITY_PLAYER;
+        
+        player->AddAnimation(ACTION_WALKING, "playerBlue_walk", LOOP_REVERSE);
+        player->animations[ACTION_WALKING]->SetSpeed(25);
+        player->AddAnimation(ACTION_DEFENDING, "playerBlue_roll", LOOP_NONE);
     }
-    
 }
 
 void GameState::LoadLevel() {

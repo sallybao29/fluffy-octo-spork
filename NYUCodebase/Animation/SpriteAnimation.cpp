@@ -4,7 +4,7 @@ SpriteAnimation::SpriteAnimation(GLuint textureID, const std::vector<float>& dat
                                  size_t sheetWidth, size_t sheetHeight, float spriteSize,
                                  LoopConvention loopStyle) : textureID(textureID), loopStyle(loopStyle) {
     
-    framesPerSecond = 3;
+    framesPerSecond = 25;
     frameIndex = 0;
     deltaFrame = 1;
     accumulator = 0.0f;

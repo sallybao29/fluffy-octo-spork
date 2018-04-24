@@ -23,12 +23,12 @@ GameState::~GameState() {
 
 void GameState::Initialize() {
     LoadLevel();
-    
+
     // Create entities
     for (int i = 0; i < map->entities.size(); i++) {
         PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
     }
-    
+    // Ensure that the player has been created
     if (player == nullptr) {
         assert(false);
     }
@@ -42,13 +42,11 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     entities.push_back(entity);
     
     // Player entity
-    if (strcmp(type.data(), "Player") == 0) {
-        player = entities.back();
-        player->previousAction = ACTION_WALKING;
+    if (strcmp(type.data(), "player") == 0) {
+        player = entity;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
         
-        // Add animations
         // Walking
         player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
         player->animations[ACTION_WALKING]->SetSpeed(25);
@@ -60,6 +58,25 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         // Jumping
         player->AddAnimation(ACTION_JUMPING, "playerBlue_up", 3, LOOP_ONCE);
         player->animations[ACTION_JUMPING]->SetSpeed(30);
+    }
+    // Flying enemy
+    else if (strcmp(type.data(), "enemyFlying") == 0) {
+        entity->entityType = ENTITY_FLYING;
+        entity->currentAction = ACTION_FLYING;
+        entity->AddAnimation(ACTION_FLYING, type, 3.5, LOOP_REVERSE, 3);
+    }
+    // Floating enemy
+    else if (strcmp(type.data(), "enemyFloating") == 0) {
+        entity->entityType = ENTITY_FLOATING;
+        entity->currentAction = ACTION_DEFENDING;
+        entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
+        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
+    }
+    // Walking enemy
+    else if (strcmp(type.data(), "enemyWalking") == 0) {
+        entity->entityType = ENTITY_WALKING;
+        entity->currentAction = ACTION_WALKING;
+        entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
     }
 }
 
@@ -125,7 +142,26 @@ void GameState::ProcessInput() {
 }
 
 void GameState::Update(float elapsed) {
-    player->Update(elapsed);
+    for (size_t i = 0; i < entities.size(); i++) {
+        entities[i]->Update(elapsed);
+        
+        switch (entities[i]->entityType) {
+            case ENTITY_WALKING:
+                if (player->currentAction == ACTION_DEFENDING) {
+                    entities[i]->velocity.x = 0.0f;
+                    continue;
+                }
+                if (player->position.x > entities[i]->position.x) {
+                    entities[i]->velocity.x = 0.2f;
+                }
+                else {
+                    entities[i]->velocity.x = -0.2f;
+                }
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void GameState::Render() {
@@ -154,12 +190,10 @@ void GameState::Render() {
     // Draw map
     map->Render(*shader);
     
-    /*
     // Draw entities
     for (size_t i = 0; i < entities.size(); i++) {
         entities[i]->Render(*shader);
-    }*/
-    player->Render(*shader);
+    }
 }
 
 

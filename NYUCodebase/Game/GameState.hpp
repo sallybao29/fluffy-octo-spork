@@ -47,6 +47,13 @@ public:
     void Render();
     
 private:
+    /*!
+     * @abstract Creates an entity of the given type at the given position
+     * @discussion Creates an entity based on its type and loads all of its animation frames
+     * @param type The type of the entity parsed from a FlareMap
+     * @param x The entity's x position on the map (in tiles)
+     * @param y The entity's y position on the map (in tiles)
+     */
     void PlaceEntity(std::string type, float x, float y);
     
     ShaderProgram* shader;

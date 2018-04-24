@@ -29,6 +29,7 @@ enum EntityType {
     ENTITY_WALKING,
     ENTITY_SWIMMING,
     ENTITY_SPIKEY,
+    ENTITY_FLOATING,
     ENTITY_NONE
 };
 
@@ -37,7 +38,9 @@ enum EntityAction {
     ACTION_JUMPING,
     ACTION_DEFENDING,
     ACTION_SWIMMING,
-    ACTION_ATTACKING
+    ACTION_ATTACKING,
+    ACTION_FLYING,
+    ACTION_NONE
 };
 
 /*!
@@ -119,7 +122,7 @@ public:
     
     std::map<EntityAction, SpriteAnimation*> animations;
     
-    EntityAction previousAction;
+    EntityAction previousAction = ACTION_NONE;
     
     EntityAction currentAction;
     

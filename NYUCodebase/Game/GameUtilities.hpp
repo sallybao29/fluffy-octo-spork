@@ -15,8 +15,11 @@
 #include <map>
 #include "TextureAtlasParser.hpp"
 
-#define TILES 0
-#define OBJECTS 1
+#define TILES "tiles"
+#define OBJECTS "objecs"
+#define B1 "background_1"
+#define H1 "hills_1"
+#define T1 "tiles_1"
 
 class Matrix;
 class Vector3;
@@ -94,7 +97,7 @@ extern const Uint8 *keys;
 extern GameMode mode;
 
 /// Dictionary of textures loaded for the game
-extern std::map<int, GLuint> textures;
+extern std::map<std::string, GLuint> textures;
 
 extern TextureAtlasParser textureAtlas;
 

@@ -19,7 +19,7 @@ const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 GameMode mode = STATE_GAME_LEVEL;
 GameState state(&program);
 
-std::map<int, GLuint> textures;
+std::map<std::string, GLuint> textures;
 
 TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.xml");
 
@@ -124,10 +124,16 @@ void Setup() {
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_LINEAR);
     GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_LINEAR);
     
+    GLuint background1 = LoadTexture(RESOURCE_FOLDER"Resources/Backgrounds/set1_background.png", GL_NEAREST);
+    GLuint hills1 = LoadTexture(RESOURCE_FOLDER"Resources/Backgrounds/set1_hills.png", GL_NEAREST);
+    GLuint tiles1 = LoadTexture(RESOURCE_FOLDER"Resources/Backgrounds/set1_tiles.png", GL_NEAREST);
+    
     // Store texture references in lookup table
     textures[TILES] = tiles;
     textures[OBJECTS] = objects;
-    
+    textures[B1] = background1;
+    textures [H1] = hills1;
+    textures [T1] = tiles1;
     // Initialize the game state
     state.Initialize();
 }

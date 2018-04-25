@@ -121,9 +121,52 @@ void GameState::Render() {
     shader->SetViewMatrix(viewMatrix);
 
     // Draw map
+    modelMatrix.Identity();
+    modelMatrix.Scale (map -> mapWidth, map ->mapHeight, 1.0f);
+    shader -> SetModelMatrix(modelMatrix);
+    std::stringstream stream;
+    stream << "background_" << level ;
+    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
+    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
+    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(shader -> positionAttribute);
+    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+    glEnableVertexAttribArray(shader -> texCoordAttribute);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    modelMatrix.Identity ();
+    modelMatrix.Translate (viewX, viewY , 0.0f);
+    modelMatrix.Scale (3.5556 * 3, projection.y * 8, 1.0f);
+    shader -> SetModelMatrix(modelMatrix);
+    std::stringstream stream2;
+    stream2 << "hills_" << level ;
+    glBindTexture(GL_TEXTURE_2D, textures [stream2.str()]);
+    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(shader -> positionAttribute);
+    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+    glEnableVertexAttribArray(shader -> texCoordAttribute);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+    modelMatrix.Identity();
+    modelMatrix.Scale (3.5556, projection.y, 1.0f);
+    shader -> SetModelMatrix( modelMatrix);
+    std::stringstream stream3;
+    stream2 << "tiles_" << level ;
+    glBindTexture(GL_TEXTURE_2D, textures [stream3.str()]);
+    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(shader -> positionAttribute);
+    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+    glEnableVertexAttribArray(shader -> texCoordAttribute);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    modelMatrix.Identity ();
+    shader -> SetModelMatrix(modelMatrix);
     map->Render(*shader);
     
     // Draw entities
+   
     for (size_t i = 0; i < entities.size(); i++) {
         entities[i]->Render(*shader);
     }

@@ -53,6 +53,8 @@ private:
     Matrix modelMatrix;
     Matrix viewMatrix;
 
+    Matrix backgroundMatrix;
+    
     FlareMap* map;
     
     Entity* player;

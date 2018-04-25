@@ -70,14 +70,6 @@ void Entity::Update(float elapsed) {
     if (frame != sprite) {
          SetSprite(frame);
     }
-
-    if (fabs(velocity.x) == 0) {
-        //animations[currentAction]->Stop();
-        animations[currentAction]->Reset();
-    }
-    else {
-        animations[currentAction]->NextFrame(fabs(velocity.x) * elapsed);
-    }
 }
 
 bool Entity::CollidesWith(Entity& other) {

@@ -11,6 +11,7 @@ SpriteAnimation::SpriteAnimation(GLuint textureID, const std::vector<float>& dat
     maxFrames = data.size() / 4;
     frames.reserve(maxFrames);
     
+    // Read the data in chunks of 4 and create SheetSprites
     for (size_t i = 0; i < data.size(); i += 4) {
         float u =  data[i] / (float) sheetWidth;
         float v = data[i+1] / (float) sheetHeight;

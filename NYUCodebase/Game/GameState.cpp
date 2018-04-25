@@ -38,6 +38,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityX = x * map->tileSize + map->tileSize / 2;
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
+    // Create entity at position (entityX, entityY)
     Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
     entities.push_back(entity);
     
@@ -63,7 +64,8 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (strcmp(type.data(), "enemyFlying") == 0) {
         entity->entityType = ENTITY_FLYING;
         entity->currentAction = ACTION_FLYING;
-        entity->AddAnimation(ACTION_FLYING, type, 3.5, LOOP_REVERSE, 3);
+        entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
     // Floating enemy
     else if (strcmp(type.data(), "enemyFloating") == 0) {
@@ -77,6 +79,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->entityType = ENTITY_WALKING;
         entity->currentAction = ACTION_WALKING;
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_WALKING]->SetSpeed(30);
     }
 }
 
@@ -143,24 +146,44 @@ void GameState::ProcessInput() {
 
 void GameState::Update(float elapsed) {
     for (size_t i = 0; i < entities.size(); i++) {
-        entities[i]->Update(elapsed);
+        Entity* entity = entities[i];
+        entity->Update(elapsed);
         
-        switch (entities[i]->entityType) {
+        switch (entity->entityType) {
             case ENTITY_WALKING:
                 if (player->currentAction == ACTION_DEFENDING) {
-                    entities[i]->velocity.x = 0.0f;
+                    entity->velocity.x = 0.0f;
+                    entity->animations[entity->currentAction]->Reset();
                     continue;
                 }
-                if (player->position.x > entities[i]->position.x) {
-                    entities[i]->velocity.x = 0.2f;
+                if (player->position.x > entity->position.x) {
+                    entity->velocity.x = 0.2f;
                 }
                 else {
-                    entities[i]->velocity.x = -0.2f;
+                    entity->velocity.x = -0.2f;
                 }
+                entity->animations[entity->currentAction]->NextFrame(fabs(entity->velocity.x) * elapsed);
+                break;
+            case ENTITY_FLOATING:
+                if (fabs(player->position.x - entity->position.x) < 0.5f) {
+                    entity->currentAction = ACTION_ATTACKING;
+                }
+                else {
+                    entity->currentAction = ACTION_DEFENDING;
+                }
+                break;
+            case ENTITY_FLYING:
+                entity->animations[entity->currentAction]->NextFrame(0.15 * elapsed);
                 break;
             default:
                 break;
         }
+    }
+    if (fabs(player->velocity.x) == 0) {
+        player->animations[player->currentAction]->Reset();
+    }
+    else {
+        player->animations[player->currentAction]->NextFrame(fabs(player->velocity.x) * elapsed);
     }
 }
 

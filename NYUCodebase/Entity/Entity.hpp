@@ -114,16 +114,28 @@ public:
      */
     bool CollidesWith(Entity& other);
     
+    /*!
+     * @discussion Adds an animation for the given entity action
+     * @param action The action to map to
+     * @param textureName The root name of the subtexture that defines the animation
+     * @param spriteSize The size of the sprites in the animation
+     * @param loopStyle The way to animation loops
+     * @param maxFrames Limits the number of matching subtextures to be at most this many
+     * @return Whether the animation was successfully added
+     */
     bool AddAnimation(EntityAction action, const std::string textureName, float spriteSize,
                       LoopConvention loopStyle, int maxFrames = -1);
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
     
+    /// Maps entity actions to animations
     std::map<EntityAction, SpriteAnimation*> animations;
     
+    /// The entity's previous action
     EntityAction previousAction = ACTION_NONE;
     
+    /// The entity's current action
     EntityAction currentAction;
     
     /// The position of the entity in world coordinates

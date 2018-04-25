@@ -135,26 +135,26 @@ void GameState::Render() {
     glEnableVertexAttribArray(shader -> texCoordAttribute);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
-    modelMatrix.Identity ();
-    modelMatrix.Translate (viewX, viewY , 0.0f);
-    modelMatrix.Scale (3.5556 * 3, projection.y * 8, 1.0f);
-    shader -> SetModelMatrix(modelMatrix);
-    std::stringstream stream2;
-    stream2 << "hills_" << level ;
-    glBindTexture(GL_TEXTURE_2D, textures [stream2.str()]);
+    modelMatrix.Identity();
+    modelMatrix.SetPosition (viewX, viewY, 0.0f);
+    modelMatrix.Scale (projection.x * 2, projection.y *2  , 1.0f);
+    shader -> SetModelMatrix( modelMatrix);
+    stream.str ("");
+    stream << "tiles_" << level ;
+    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
     glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
     glEnableVertexAttribArray(shader -> positionAttribute);
     glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
     glEnableVertexAttribArray(shader -> texCoordAttribute);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-    modelMatrix.Identity();
-    modelMatrix.Scale (3.5556, projection.y, 1.0f);
-    shader -> SetModelMatrix( modelMatrix);
-    std::stringstream stream3;
-    stream2 << "tiles_" << level ;
-    glBindTexture(GL_TEXTURE_2D, textures [stream3.str()]);
+    
+    modelMatrix.Identity ();
+    modelMatrix.SetPosition (viewX + projection.x * 0.25, viewY + projection.y * 0.375 , 0.0f);
+    modelMatrix.Scale (projection.x * 2.5, projection.y * 2.5, 1.0f);
+    shader -> SetModelMatrix(modelMatrix);
+    stream.str ("");
+    stream << "hills_" << level ;
+    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
     glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
     glEnableVertexAttribArray(shader -> positionAttribute);
     glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);

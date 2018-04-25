@@ -17,9 +17,6 @@
 
 #define TILES "tiles"
 #define OBJECTS "objecs"
-#define B1 "background_1"
-#define H1 "hills_1"
-#define T1 "tiles_1"
 
 class Matrix;
 class Vector3;

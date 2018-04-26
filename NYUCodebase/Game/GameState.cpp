@@ -150,6 +150,18 @@ void GameState::Update(float elapsed) {
         entity->Update(elapsed);
         
         switch (entity->entityType) {
+            // Player
+            case ENTITY_PLAYER:
+                // If it stops, reset animation
+                if (fabs(entity->velocity.x) == 0) {
+                    entity->animations[entity->currentAction]->Reset();
+                }
+                // Advance animation when player is moving
+                else {
+                    entity->animations[entity->currentAction]->NextFrame(fabs(entity->velocity.x) * elapsed);
+                }
+                break;
+            // Walking enemy
             case ENTITY_WALKING:
                 if (player->currentAction == ACTION_DEFENDING) {
                     entity->velocity.x = 0.0f;
@@ -164,26 +176,24 @@ void GameState::Update(float elapsed) {
                 }
                 entity->animations[entity->currentAction]->NextFrame(fabs(entity->velocity.x) * elapsed);
                 break;
+            // Floating enemy
             case ENTITY_FLOATING:
+                // Actives when player walks into range
                 if (fabs(player->position.x - entity->position.x) < 0.5f) {
                     entity->currentAction = ACTION_ATTACKING;
                 }
+                // Deactivates when player leaves range
                 else {
                     entity->currentAction = ACTION_DEFENDING;
                 }
                 break;
+            // Flying enemy
             case ENTITY_FLYING:
                 entity->animations[entity->currentAction]->NextFrame(0.15 * elapsed);
                 break;
             default:
                 break;
         }
-    }
-    if (fabs(player->velocity.x) == 0) {
-        player->animations[player->currentAction]->Reset();
-    }
-    else {
-        player->animations[player->currentAction]->NextFrame(fabs(player->velocity.x) * elapsed);
     }
 }
 

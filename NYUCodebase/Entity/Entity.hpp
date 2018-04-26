@@ -96,6 +96,9 @@ public:
      */
     bool CollidesWith(Entity& other);
     
+    // Converting to world coordinates
+    void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY);
+    
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
     

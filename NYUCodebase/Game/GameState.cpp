@@ -94,7 +94,76 @@ void GameState::ProcessInput() {
     }
 }
 
+// checking for tile collisions in game
+void GameState::Collision () {
+    
+    int TileX;
+    int TileY;
+    int TileLeftX;
+    int TileRightX;
+    int TileTopY;
+    int TileBottomY;
+    // calculate the above Tile values of center, left, right, top, bottom
+    player -> worldToTileCoordinates(player -> position.x, player -> position.y, &TileX, &TileY);
+    player -> worldToTileCoordinates(player -> position.x - player -> shape -> size.x, player -> position.y - player -> shape -> size.y/2 , &TileLeftX, &TileBottomY);
+    player -> worldToTileCoordinates(player -> position.x + player -> shape -> size.x/2, player -> position.y + player -> shape -> size.y/2, &TileRightX, &TileTopY);
+    
+    // if tile below is 0, free fall
+    
+    std :: cout << map -> mapData [TileBottomY] [TileX] << std:: endl;
+    if (map -> mapData[TileBottomY] [TileX] == 0) {
+        // player -> gravity.y = -0.55f;
+        player -> velocity.y = -1.0f;
+    }
+    
+    
+    // if tile below is solid, reset bottom to be on top
+    else if (map ->mapData [TileBottomY][ TileX] != 0) {
+        float worldBotY = -1 * map -> tileSize * TileBottomY;
+        if (worldBotY > player -> position.y - player -> shape -> size.y/2) {
+            player -> acceleration.y = 0.0f;
+            player -> velocity.y = 0.0f;
+            player -> position.y += (worldBotY - player -> position.y - player -> shape -> size.y/2) + map -> tileSize;
+        }
+    }
+    
+    // if tile above is solid
+    if (map -> mapData [TileTopY][ TileX] != 0) {
+        float worldTopY = -1 * map -> tileSize * TileTopY;
+        if (worldTopY - map -> tileSize < player -> position.y + player -> shape -> size.y/2) {
+            player -> acceleration.y = 0.0f;
+            player -> velocity.y = 0.0f;
+            player -> position.y -= (player -> position.y + player -> shape -> size.y/2 - worldTopY) + map -> tileSize;
+        }
+    }
+    
+    // if right tile is solid
+    if (map -> mapData [TileY][TileRightX] != 0) {
+        float worldRightX = map -> tileSize * TileRightX;
+        if (worldRightX < player -> position.x + player -> shape -> size.x/2) {
+            player -> acceleration.x = 0.0f;
+            player -> velocity.x = 0.0f;
+            player -> position.x -= (player -> position.x + player -> shape -> size.x/2 - worldRightX) ;
+        }
+    }
+    
+    // if left tile is solid
+    if (map -> mapData [TileY][TileLeftX] != 0) {
+        float worldLeftX = map -> tileSize * TileLeftX;
+        if (worldLeftX + map -> tileSize > player -> position.x - player -> shape -> size.x/2) {
+            player -> acceleration.x = 0.0f;
+            player -> velocity.x = 0.0f;
+            player -> position.x += (worldLeftX - player -> position.x - player -> shape -> size.x/2) + 2 * map -> tileSize;
+        }
+    }
+}
+
+
 void GameState::Update(float elapsed) {
+    player -> position.x += 1.0 * elapsed;
+    Collision();
+    player -> position.y += player -> velocity.y * elapsed;
+    //Collision ();
 }
 
 void GameState::RenderTextures(const std::string& stream) {

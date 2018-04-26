@@ -37,9 +37,10 @@ public:
      */
     virtual Shape* Clone() const = 0;
     virtual ~Shape() {}
-protected:
+    
     /// The width and height of the shape
     Vector3 size;
+protected:
     
     /// The main vertices of this shape
     std::vector<Vector3> vertices;

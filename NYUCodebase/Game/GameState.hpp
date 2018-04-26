@@ -35,6 +35,12 @@ public:
     void ProcessInput();
     
     /*!
+     * @discussion Checking collision between solids and player
+     */
+    
+    void Collision ();
+    
+    /*!
      * @discussion Updates the game state by an elapsed amount of time. New entity positions are determined
      * and collisions are resolved here.
      * @param elapsed The amount of time that has passed

@@ -96,3 +96,9 @@ void Entity::SetColor(float r, float g, float b, float a) {
     color[ALPHA] = a;
 }
 
+//converting to Tile coordinates
+void Entity::worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY) {
+    *gridX = (int)(worldX / 0.3f);
+    *gridY = (int)(-worldY / 0.3f);
+}
+

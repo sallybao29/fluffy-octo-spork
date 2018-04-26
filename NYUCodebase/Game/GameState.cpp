@@ -97,6 +97,17 @@ void GameState::ProcessInput() {
 void GameState::Update(float elapsed) {
 }
 
+void GameState::RenderTextures(const std::string& stream) {
+    glBindTexture(GL_TEXTURE_2D, textures [stream]);
+    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
+    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(shader -> positionAttribute);
+    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+    glEnableVertexAttribArray(shader -> texCoordAttribute);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
 void GameState::Render() {
     modelMatrix.Identity();
     shader->SetModelMatrix(modelMatrix);
@@ -119,48 +130,34 @@ void GameState::Render() {
     viewMatrix.Identity();
     viewMatrix.Translate(-viewX, -viewY, 0.0f);
     shader->SetViewMatrix(viewMatrix);
-
-    // Draw map
+    
+    // Draw background
     modelMatrix.Identity();
     modelMatrix.Scale (map -> mapWidth, map ->mapHeight, 1.0f);
     shader -> SetModelMatrix(modelMatrix);
     std::stringstream stream;
     stream << "background_" << level ;
-    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
-    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
-    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
-    glEnableVertexAttribArray(shader -> positionAttribute);
-    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
-    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-    glEnableVertexAttribArray(shader -> texCoordAttribute);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    RenderTextures(stream.str ());
     
+    // Draw background tiles
     modelMatrix.Identity();
     modelMatrix.SetPosition (viewX, viewY, 0.0f);
     modelMatrix.Scale (projection.x * 2, projection.y *2  , 1.0f);
     shader -> SetModelMatrix( modelMatrix);
     stream.str ("");
     stream << "tiles_" << level ;
-    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
-    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
-    glEnableVertexAttribArray(shader -> positionAttribute);
-    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-    glEnableVertexAttribArray(shader -> texCoordAttribute);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    RenderTextures (stream.str());
     
+    // Draw background hills
     modelMatrix.Identity ();
     modelMatrix.SetPosition (viewX + projection.x * 0.25, viewY + projection.y * 0.375 , 0.0f);
     modelMatrix.Scale (projection.x * 2.5, projection.y * 2.5, 1.0f);
     shader -> SetModelMatrix(modelMatrix);
     stream.str ("");
     stream << "hills_" << level ;
-    glBindTexture(GL_TEXTURE_2D, textures [stream.str()]);
-    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
-    glEnableVertexAttribArray(shader -> positionAttribute);
-    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-    glEnableVertexAttribArray(shader -> texCoordAttribute);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    RenderTextures(stream.str());
     
+    // Draw map
     modelMatrix.Identity ();
     shader -> SetModelMatrix(modelMatrix);
     map->Render(*shader);
@@ -171,5 +168,6 @@ void GameState::Render() {
         entities[i]->Render(*shader);
     }
 }
+
 
 

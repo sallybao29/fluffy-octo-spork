@@ -42,9 +42,15 @@ public:
     void Update(float elapsed);
     
     /*!
+     * @discussion Draws textures for background. Takes in a string key to obtain value from textures.
+     */
+    void RenderTextures(const std::string& stream);
+    
+    /*!
      * @discussion Renders the tile map and all objects in the game
      */
     void Render();
+    
     
 private:
     void PlaceEntity(std::string type, float x, float y);

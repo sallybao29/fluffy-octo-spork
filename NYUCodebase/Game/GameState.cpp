@@ -59,6 +59,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     
     if (entityType == ENTITY_PLAYER) {
         player = entity;
+        player -> velocity.x = 1.0f;
     }
 }
 
@@ -109,8 +110,6 @@ void GameState::Collision () {
     player -> worldToTileCoordinates(player -> position.x + player -> shape -> size.x/2, player -> position.y + player -> shape -> size.y/2, &TileRightX, &TileTopY);
     
     // if tile below is 0, free fall
-    
-    std :: cout << map -> mapData [TileBottomY] [TileX] << std:: endl;
     if (map -> mapData[TileBottomY] [TileX] == 0) {
         // player -> gravity.y = -0.55f;
         player -> velocity.y = -1.0f;
@@ -160,10 +159,34 @@ void GameState::Collision () {
 
 
 void GameState::Update(float elapsed) {
-    player -> position.x += 1.0 * elapsed;
+    player -> acceleration.x = 0.0f;
+    player -> acceleration.y = 0.0f;
+    if (keys [SDL_SCANCODE_LEFT]) {
+        player -> acceleration.x = -1 * ACCELERATION;
+        player -> velocity.x = -1.0f;
+        player -> velocity.x += player -> acceleration.x * elapsed;
+        player -> velocity.x = lerp(player -> velocity.x, FRICTION, elapsed * 1.5);
+        player -> position.x += player -> velocity.x * elapsed;
+    }
+    
+    if (keys [SDL_SCANCODE_RIGHT]) {
+        player -> acceleration.x = ACCELERATION;
+        player -> velocity.x = 1.0f;
+        player -> velocity.x += player -> acceleration.x * elapsed;
+        player -> velocity.x = lerp(player -> velocity.x, FRICTION, elapsed * 1.5);
+        player -> position.x += player -> velocity.x * elapsed;
+    }
+
     Collision();
+    
+    if (keys [SDL_SCANCODE_UP]) {
+        player -> acceleration.y = -1 * ACCELERATION;
+        player -> velocity.y = 3.0f;
+        player -> velocity.y += player -> acceleration.y * elapsed;
+    }
     player -> position.y += player -> velocity.y * elapsed;
-    //Collision ();
+
+    Collision ();
 }
 
 void GameState::RenderTextures(const std::string& stream) {

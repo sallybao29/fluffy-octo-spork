@@ -19,7 +19,7 @@ const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 GameMode mode = STATE_GAME_LEVEL;
 GameState state(&program);
 
-std::map<int, GLuint> textures;
+std::map<std::string, GLuint> textures;
 
 TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.xml");
 
@@ -127,6 +127,36 @@ void Setup() {
     // Store texture references in lookup table
     textures[TILES] = tiles;
     textures[OBJECTS] = objects;
+    
+    std::stringstream stream;
+    std::stringstream streamLoad;
+    for (int i = 1; i < 4; i++ ) {
+        
+        stream.str ("");
+        streamLoad.str ("");
+        
+        stream << "background_" << i ;
+        streamLoad << RESOURCE_FOLDER << "Resources/Backgrounds/set" << i << "_background.png";
+        GLuint background = LoadTexture(streamLoad.str().data(), GL_NEAREST);
+        textures [stream.str ()] = background;
+        
+        stream.str ("");
+        streamLoad.str ("");
+        
+        stream << "hills_" << i ;
+        streamLoad << RESOURCE_FOLDER << "Resources/Backgrounds/set" << i << "_hills.png";
+        GLuint hills = LoadTexture(streamLoad.str().data(), GL_NEAREST);
+        textures [stream.str ()] = hills;
+        
+        stream.str ("");
+        streamLoad.str ("");
+        
+        stream << "tiles_" << i ;
+        streamLoad << RESOURCE_FOLDER << "Resources/Backgrounds/set" << i << "_tiles.png";
+        GLuint tiles = LoadTexture(streamLoad.str().data(), GL_NEAREST);
+        textures [stream.str ()] = tiles;
+        
+    }
     
     // Initialize the game state
     state.Initialize();

@@ -60,9 +60,16 @@ void DrawText(ShaderProgram& program, int fontTexture, std::string text, float s
 void DrawShape(ShaderProgram& program, const Shape& shape);
 
 /*!
+ * @discussion Draws a texture with the given shader program
+ # @param program The shader program to use for rendering
+ # @param textureID The id of the texture to render
+ */
+void DrawTexture(ShaderProgram& program, GLuint textureID);
+
+/*!
  * @abstract Converts object space vertices to world space
  * @discussion Multiplies each Vector3 vertex by the given transformation matrix to
- *   produce a vector of world space coordinates
+ * produce a vector of world space coordinates
  * @param matrix The transformation matrix
  * @param points The vertices to convert
  * @return A vector of world space coordinates as (x, y) pairs

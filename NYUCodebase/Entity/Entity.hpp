@@ -96,8 +96,21 @@ public:
      */
     bool CollidesWith(Entity& other);
     
-    // Converting to world coordinates
-    void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY);
+    /*!
+     * @discussion Checks if the entity is colliding with the given tile in the x direction and sets
+     * its contact flags
+     * @param x The x coordinate of the tile
+     * @return Whether the collision was resolved
+     */
+    bool CollidesWithX(float x, float width);
+    
+    /*!
+     * @discussion Checks if the entity is colliding with the given tile in the y direction and sets
+     * its contact flags
+     * @param y The y coordinate of the tile
+     * @return Whether the collision was resolved
+     */
+    bool CollidesWithY(float y, float height);
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;

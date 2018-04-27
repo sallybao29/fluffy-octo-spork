@@ -3,10 +3,21 @@
 #include "GameState.hpp"
 
 #define ACCELERATION 0.7f
+#define MAX_VELOCITY_X 3.0f
+#define JUMP_VELOCITY 3.5f
 #define FRICTION 0.6f
-#define GRAVITY 1.5f
+#define GRAVITY 4.9f
+
+#define COLLIDE_X 0
+#define COLLIDE_Y 1
 
 #define DELTA 0.00001f
+
+std::unordered_set<unsigned int> solidTiles =
+{
+    // Red world
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256
+};
 
 GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
 
@@ -59,7 +70,6 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     
     if (entityType == ENTITY_PLAYER) {
         player = entity;
-        player -> velocity.x = 1.0f;
     }
 }
 
@@ -88,116 +98,135 @@ void GameState::Reset() {
 }
 
 void GameState::ProcessInput() {
+    player->acceleration.x = 0;
+    player->acceleration.y = 0;
+    
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
             done = true;
         }
-    }
-}
-
-// checking for tile collisions in game
-void GameState::Collision () {
-    
-    int TileX;
-    int TileY;
-    int TileLeftX;
-    int TileRightX;
-    int TileTopY;
-    int TileBottomY;
-    // calculate the above Tile values of center, left, right, top, bottom
-    player -> worldToTileCoordinates(player -> position.x, player -> position.y, &TileX, &TileY);
-    player -> worldToTileCoordinates(player -> position.x - player -> shape -> size.x, player -> position.y - player -> shape -> size.y/2 , &TileLeftX, &TileBottomY);
-    player -> worldToTileCoordinates(player -> position.x + player -> shape -> size.x/2, player -> position.y + player -> shape -> size.y/2, &TileRightX, &TileTopY);
-    
-    // if tile below is 0, free fall
-    if (map -> mapData[TileBottomY] [TileX] == 0) {
-        // player -> gravity.y = -0.55f;
-        player -> velocity.y = -1.0f;
-    }
-    
-    
-    // if tile below is solid, reset bottom to be on top
-    else if (map ->mapData [TileBottomY][ TileX] != 0) {
-        float worldBotY = -1 * map -> tileSize * TileBottomY;
-        if (worldBotY > player -> position.y - player -> shape -> size.y/2) {
-            player -> acceleration.y = 0.0f;
-            player -> velocity.y = 0.0f;
-            player -> position.y += (worldBotY - player -> position.y - player -> shape -> size.y/2) + map -> tileSize;
+        else if (event.type == SDL_KEYDOWN) {
+            // Can only jump if ground below is solid
+            if (player->collidedBottom) {
+                if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+                    player->velocity.y = JUMP_VELOCITY;
+                    timer.start();
+                }
+            }
         }
     }
-    
-    // if tile above is solid
-    if (map -> mapData [TileTopY][ TileX] != 0) {
-        float worldTopY = -1 * map -> tileSize * TileTopY;
-        if (worldTopY - map -> tileSize < player -> position.y + player -> shape -> size.y/2) {
-            player -> acceleration.y = 0.0f;
-            player -> velocity.y = 0.0f;
-            player -> position.y -= (player -> position.y + player -> shape -> size.y/2 - worldTopY) + map -> tileSize;
+    // Can only accelerate when standing on something
+    if (player->collidedBottom) {
+        if (keys[SDL_SCANCODE_RIGHT] && player->velocity.x < MAX_VELOCITY_X) {
+            player->acceleration.x = ACCELERATION;
+        }
+        else if (keys[SDL_SCANCODE_LEFT] && player->velocity.x > -MAX_VELOCITY_X) {
+            player->acceleration.x = -ACCELERATION;
         }
     }
-    
-    // if right tile is solid
-    if (map -> mapData [TileY][TileRightX] != 0) {
-        float worldRightX = map -> tileSize * TileRightX;
-        if (worldRightX < player -> position.x + player -> shape -> size.x/2) {
-            player -> acceleration.x = 0.0f;
-            player -> velocity.x = 0.0f;
-            player -> position.x -= (player -> position.x + player -> shape -> size.x/2 - worldRightX) ;
+    // If jumping, allow left/right velocity to be set
+    else if (timer.isRunning()) {
+        if (keys[SDL_SCANCODE_RIGHT]) {
+            player->velocity.x = 1.0f;
         }
-    }
-    
-    // if left tile is solid
-    if (map -> mapData [TileY][TileLeftX] != 0) {
-        float worldLeftX = map -> tileSize * TileLeftX;
-        if (worldLeftX + map -> tileSize > player -> position.x - player -> shape -> size.x/2) {
-            player -> acceleration.x = 0.0f;
-            player -> velocity.x = 0.0f;
-            player -> position.x += (worldLeftX - player -> position.x - player -> shape -> size.x/2) + 2 * map -> tileSize;
+        else if (keys[SDL_SCANCODE_LEFT]) {
+            player->velocity.x = -1.0f;
+        }
+        // End of jump
+        if (timer.isOver(0.3f)) {
+            player->velocity.y = 0.0f;
+            timer.reset();
         }
     }
 }
 
+bool GameState::ResolveCollisionY(Entity& entity, int x, int y, float size) {
+    // Only resolve collision if tile is solid
+    if (x < 0 || y < 0 ||
+        map->mapData[y][x] == 0 ||
+        solidTiles.find(map->mapData[y][x] - 1) == solidTiles.end()) return false;
+    
+    // Move tile coordinates to center of tile
+    float centerY = -y * size - size / 2;
+    return entity.CollidesWithY(centerY, size);
+}
+
+bool GameState::ResolveCollisionX(Entity& entity, int x, int y, float size) {
+    // Only resolve collision if tile is solid
+    if (x < 0 || y < 0 ||
+        map->mapData[y][x] == 0 ||
+        solidTiles.find(map->mapData[y][x] - 1) == solidTiles.end()) return false;
+    
+    // Move tile coordinates to center of tile
+    float centerX = x * size + size / 2;
+    return entity.CollidesWithX(centerX, size);
+}
+
+void GameState::CollideWithMap(Entity& entity, int direction) {
+    if (direction == COLLIDE_Y) {
+        // Sample 2 points along the width of the entity;
+        int midX1 = map->worldToTileCoordX(entity.position.x - entity.shape->size.x / 4);
+        int midX2 = map->worldToTileCoordX(entity.position.x + entity.shape->size.x / 4);
+        
+        if (entity.velocity.y > 0) {
+            int topY = map->worldToTileCoordY(entity.position.y + entity.shape->size.y / 2);
+            if (!ResolveCollisionY(entity, midX1, topY, map->tileSize))
+                ResolveCollisionY(entity, midX2, topY, map->tileSize);
+        }
+        else {
+            int botY = map->worldToTileCoordY(entity.position.y - entity.shape->size.y / 2);
+            if (!ResolveCollisionY(entity, midX1, botY, map->tileSize))
+                ResolveCollisionY(entity, midX2, botY, map->tileSize);
+        }
+    }
+    else if (direction == COLLIDE_X) {
+        if (entity.velocity.x > 0) {
+            int rightX, rightY;
+            map->worldToTileCoordinates(entity.position.x + entity.shape->size.x / 2, entity.position.y, rightX, rightY);
+            ResolveCollisionX(entity, rightX, rightY, map->tileSize);
+        }
+        else {
+            int leftX, leftY;
+            map->worldToTileCoordinates(entity.position.x - entity.shape->size.x / 2, entity.position.y, leftX, leftY);
+            ResolveCollisionX(entity, leftX, leftY, map->tileSize);
+        }
+    }
+}
 
 void GameState::Update(float elapsed) {
-    player -> acceleration.x = 0.0f;
-    player -> acceleration.y = 0.0f;
-    if (keys [SDL_SCANCODE_LEFT]) {
-        player -> acceleration.x = -1 * ACCELERATION;
-        player -> velocity.x = -1.0f;
-        player -> velocity.x += player -> acceleration.x * elapsed;
-        player -> velocity.x = lerp(player -> velocity.x, FRICTION, elapsed * 1.5);
-        player -> position.x += player -> velocity.x * elapsed;
+    for (int i = 0; i < entities.size(); i++) {
+        Entity* entity = entities[i];
+        
+        // Reset all contact flags
+        entity->Update(elapsed);
+        
+        // Apply friction
+        entity->velocity.x = lerp(entity->velocity.x, 0.0f, elapsed * FRICTION);
+        entity->velocity.y = lerp(entity->velocity.y, 0.0f, elapsed * FRICTION);
+        
+        // Apply acceleration
+        entity->velocity.x += entity->acceleration.x * elapsed;
+        entity->velocity.y += entity->acceleration.y * elapsed;
+        
+        // Apply gravity
+        entity->velocity.y -= GRAVITY * elapsed;
+        
+        // Apply y-axis velocity
+        entity->position.y += entity->velocity.y * elapsed;
+        CollideWithMap(*entity, COLLIDE_Y);
+        
+        // Apply x-axis velocity
+        entity->position.x += entity->velocity.x * elapsed;
+        CollideWithMap(*entity, COLLIDE_X);
     }
     
-    if (keys [SDL_SCANCODE_RIGHT]) {
-        player -> acceleration.x = ACCELERATION;
-        player -> velocity.x = 1.0f;
-        player -> velocity.x += player -> acceleration.x * elapsed;
-        player -> velocity.x = lerp(player -> velocity.x, FRICTION, elapsed * 1.5);
-        player -> position.x += player -> velocity.x * elapsed;
+    // Keep player in bounds of map
+    if (player->position.x - player->shape->size.x / 2 < 0) {
+        player->position.x = player->shape->size.x / 2 + DELTA;
     }
-
-    Collision();
-    
-    if (keys [SDL_SCANCODE_UP]) {
-        player -> acceleration.y = -1 * ACCELERATION;
-        player -> velocity.y = 3.0f;
-        player -> velocity.y += player -> acceleration.y * elapsed;
+    else if (player->position.x + player->shape->size.x / 2 > map->mapWidth * map->tileSize) {
+        player->position.x = map->mapWidth * map->tileSize - player->shape->size.x / 2 - DELTA;
     }
-    player -> position.y += player -> velocity.y * elapsed;
-
-    Collision ();
-}
-
-void GameState::RenderTextures(const std::string& stream) {
-    glBindTexture(GL_TEXTURE_2D, textures [stream]);
-    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
-    glVertexAttribPointer(shader -> positionAttribute, 2, GL_FLOAT, false, 0, vertices);
-    glEnableVertexAttribArray(shader -> positionAttribute);
-    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
-    glVertexAttribPointer(shader -> texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-    glEnableVertexAttribArray(shader -> texCoordAttribute);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void GameState::Render() {
@@ -225,11 +254,11 @@ void GameState::Render() {
     
     // Draw background
     modelMatrix.Identity();
-    modelMatrix.Scale (map -> mapWidth, map ->mapHeight, 1.0f);
+    modelMatrix.Scale (map->mapWidth, map->mapHeight, 1.0f);
     shader -> SetModelMatrix(modelMatrix);
     std::stringstream stream;
     stream << "background_" << level ;
-    RenderTextures(stream.str ());
+    DrawTexture(*shader, textures[stream.str()]);
     
     // Draw background tiles
     modelMatrix.Identity();
@@ -238,7 +267,7 @@ void GameState::Render() {
     shader -> SetModelMatrix( modelMatrix);
     stream.str ("");
     stream << "tiles_" << level ;
-    RenderTextures (stream.str());
+    DrawTexture(*shader, textures[stream.str()]);
     
     // Draw background hills
     modelMatrix.Identity ();
@@ -247,7 +276,7 @@ void GameState::Render() {
     shader -> SetModelMatrix(modelMatrix);
     stream.str ("");
     stream << "hills_" << level ;
-    RenderTextures(stream.str());
+    DrawTexture(*shader, textures[stream.str()]);
     
     // Draw map
     modelMatrix.Identity ();

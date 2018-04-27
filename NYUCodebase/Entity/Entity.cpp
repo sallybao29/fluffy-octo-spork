@@ -89,16 +89,52 @@ bool Entity::CollidesWith(Entity& other) {
     return collided;
 }
 
+bool Entity::CollidesWithX(float x, float width) {
+    collidedLeft = (position.x - shape->size.x / 2 < x + width / 2) &&
+                   (position.x - shape->size.x / 2 > x - width / 2);
+    collidedRight = (position.x + shape->size.x / 2 < x + width / 2) &&
+                    (position.x + shape->size.x / 2 > x - width / 2);
+    
+    // Adjust by the amount of penetration if there is collision
+    if (collidedRight) {
+        float penetration = fabs((position.x + shape->size.x / 2) - (x - width / 2));
+        position.x -= penetration - DELTA;
+        velocity.x = 0;
+    }
+    else if (collidedLeft) {
+        float penetration = fabs((x + width / 2) - (position.x - shape->size.x / 2));
+        position.x += penetration + DELTA;
+        velocity.x = 0;
+    }
+    
+    return collidedLeft || collidedRight;
+}
+
+bool Entity::CollidesWithY(float y, float height) {
+    collidedTop = (position.y + shape->size.y / 2 < y + height / 2) &&
+                  (position.y + shape->size.y / 2 > y - height / 2);
+    collidedBottom = (position.y + shape->size.y / 2 > y + height / 2) &&
+                     (position.y - shape->size.y / 2 < y + height / 2);
+    
+    // Adjust by the amount of penetration if there is collision
+    if (collidedTop) {
+        float penetration = fabs((position.y + shape->size.y / 2) - (y - height / 2));
+        position.y -= penetration - DELTA;
+        velocity.y = 0;
+    }
+    else if (collidedBottom) {
+        float penetration = fabs((y + height / 2) - (position.y - shape->size.y / 2));
+        position.y += penetration + DELTA;
+        velocity.y = 0;
+    }
+    
+    return collidedTop || collidedBottom;
+}
+
+
 void Entity::SetColor(float r, float g, float b, float a) {
     color[RED] = r;
     color[GREEN] = g;
     color[BLUE] = b;
     color[ALPHA] = a;
 }
-
-//converting to Tile coordinates
-void Entity::worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY) {
-    *gridX = (int)(worldX / 0.3f);
-    *gridY = (int)(-worldY / 0.3f);
-}
-

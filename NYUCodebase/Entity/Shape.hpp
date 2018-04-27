@@ -40,8 +40,8 @@ public:
     
     /// The width and height of the shape
     Vector3 size;
-protected:
     
+protected:
     /// The main vertices of this shape
     std::vector<Vector3> vertices;
     /// The vertices of each triangle that composes this shape. Counter-clockwise order

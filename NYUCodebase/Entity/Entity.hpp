@@ -142,6 +142,8 @@ public:
      */
     bool CollidesWithY(float y, float height);
 
+    /// Whether the player is facing right
+    bool facingRight = true;
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;

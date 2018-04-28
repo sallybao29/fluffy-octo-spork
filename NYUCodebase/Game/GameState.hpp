@@ -83,6 +83,21 @@ private:
      */
     bool ResolveCollisionX(Entity& entity, int x, int y, float size);
     
+    /*!
+     * @discussion Advances the physics of the world by the elapsed amount of time and resolves
+     * collisions for entities
+     * @param entity The entity to update
+     * @param elapsed The amount of time that has elapsed
+     */
+    void UpdatePhysics(Entity& entity, float elapsed);
+    
+    /*!
+     * @discussion Updates the animation for the entity
+     * @param entity The entity to update
+     * @param elapsed The amount of time that has elapsed
+     */
+    void UpdateAnimation(Entity& entity, float elapsed);
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;

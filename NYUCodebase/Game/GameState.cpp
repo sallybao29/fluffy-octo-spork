@@ -61,7 +61,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         
         // Walking
         player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
-        player->animations[ACTION_WALKING]->SetSpeed(25);
+        player->animations[ACTION_WALKING]->SetSpeed(20);
         // Defending
         player->AddAnimation(ACTION_DEFENDING, "playerBlue_roll", 3, LOOP_NONE);
         // Swimming
@@ -119,8 +119,8 @@ void GameState::Reset() {
 }
 
 void GameState::ProcessInput() {
-    player->acceleration.x = 0;
-    player->acceleration.y = 0;
+    player->acceleration.x = 0.0f;
+    player->acceleration.y = 0.0f;
     
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -128,21 +128,37 @@ void GameState::ProcessInput() {
         }
         else if (event.type == SDL_KEYDOWN) {
             // Can only jump if ground below is solid
-            if (player->collidedBottom) {
+            // Defense form cannot move
+            if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
                 if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
                     player->velocity.y = JUMP_VELOCITY;
+                    player->previousAction = player->currentAction;
+                    player->currentAction = ACTION_JUMPING;
+                    // Reset the jumping animation
+                    player->animations[ACTION_JUMPING]->Reset();
                     timer.start();
                 }
             }
         }
-    }
-    // Can only accelerate when standing on something
-    if (player->collidedBottom) {
-        if (keys[SDL_SCANCODE_RIGHT] && player->velocity.x < MAX_VELOCITY_X) {
-            player->acceleration.x = ACCELERATION;
+        // Revert from defense form to previous state
+        else if (event.type == SDL_KEYUP) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_D) {
+                player->currentAction = player->previousAction;
+                player->previousAction = ACTION_DEFENDING;
+            }
         }
-        else if (keys[SDL_SCANCODE_LEFT] && player->velocity.x > -MAX_VELOCITY_X) {
-            player->acceleration.x = -ACCELERATION;
+    }
+    // Walking
+    // Defense form cannot move
+    if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
+        if (keys[SDL_SCANCODE_RIGHT]) {
+            player->velocity.x = 0.5f;
+        }
+        else if (keys[SDL_SCANCODE_LEFT]) {
+            player->velocity.x = -0.5f;
+        }
+        else {
+            player->velocity.x = 0.0f;
         }
     }
     // If jumping, allow left/right velocity to be set
@@ -157,6 +173,13 @@ void GameState::ProcessInput() {
         if (timer.isOver(0.3f)) {
             player->velocity.y = 0.0f;
             timer.reset();
+        }
+    }
+    // Defending
+    if (keys[SDL_SCANCODE_D]) {
+        if (player->currentAction != ACTION_DEFENDING) {
+            player->previousAction = player->currentAction;
+            player->currentAction = ACTION_DEFENDING;
         }
     }
 }
@@ -214,36 +237,87 @@ void GameState::CollideWithMap(Entity& entity, int direction) {
     }
 }
 
+void GameState::UpdatePhysics(Entity& entity, float elapsed) {
+    // Reset all contact flags
+    entity.Update(elapsed);
+    
+    // Apply friction
+    entity.velocity.x = lerp(entity.velocity.x, 0.0f, elapsed * FRICTION);
+    entity.velocity.y = lerp(entity.velocity.y, 0.0f, elapsed * FRICTION);
+    
+    // Apply acceleration
+    entity.velocity.x += entity.acceleration.x * elapsed;
+    entity.velocity.y += entity.acceleration.y * elapsed;
+    
+    // Apply gravity
+    entity.velocity.y -= GRAVITY * elapsed;
+    
+    // Apply y-axis velocity
+    entity.position.y += entity.velocity.y * elapsed;
+    CollideWithMap(entity, COLLIDE_Y);
+    
+    // Apply x-axis velocity
+    entity.position.x += entity.velocity.x * elapsed;
+    CollideWithMap(entity, COLLIDE_X);
+}
+
+void GameState::UpdateAnimation(Entity& entity, float elapsed) {
+    float frameSpeed = elapsed;
+    switch (entity.entityType) {
+        case ENTITY_PLAYER:
+            // If the player has just landed after jumping, change their animation back to its previous state
+            if (player->collidedBottom && player->currentAction == ACTION_JUMPING) {
+                player->currentAction = player->previousAction;
+                player->previousAction = ACTION_JUMPING;
+            }
+            // If player is walking
+            if (player->currentAction == ACTION_WALKING) {
+                if (player->velocity.x == 0)
+                    player->animations[player->currentAction]->Reset();
+                else
+                    // Speed of animation frame update is proportional to player's velocity
+                    frameSpeed = fabs(player->velocity.x) * elapsed;
+            }
+            else if (player->currentAction == ACTION_JUMPING) {
+                // Speed of animation frame update is proportional to player's velocity
+                frameSpeed = fabs(player->velocity.y) * elapsed;
+            }
+            // Advance the animation frame
+            player->animations[player->currentAction]->NextFrame(frameSpeed);
+            break;
+        case ENTITY_WALKING:
+            // TODO
+            break;
+        case ENTITY_FLOATING:
+            // Activates when player enters range
+            if (fabs(player->position.x - entity.position.x) < 0.5f) {
+                entity.currentAction = ACTION_ATTACKING;
+            }
+            // Otherwise idle
+            else {
+                entity.currentAction = ACTION_DEFENDING;
+            }
+            break;
+        case ENTITY_FLYING:
+            // For now, it just flies in place
+            entity.animations[entity.currentAction]->NextFrame(0.15 * frameSpeed);
+            // TOGO
+            break;
+        default:
+            break;
+    }
+    // Retrieve the sprite for the current frame
+    SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
+    if (frame != entity.sprite) {
+        entity.SetSprite(frame);
+    }
+}
+
 void GameState::Update(float elapsed) {
     for (int i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
-        
-        // Reset all contact flags
-        entity->Update(elapsed);
-        
-        // Apply friction
-        entity->velocity.x = lerp(entity->velocity.x, 0.0f, elapsed * FRICTION);
-        entity->velocity.y = lerp(entity->velocity.y, 0.0f, elapsed * FRICTION);
-        
-        // Apply acceleration
-        entity->velocity.x += entity->acceleration.x * elapsed;
-        entity->velocity.y += entity->acceleration.y * elapsed;
-        
-        // Apply gravity
-        entity->velocity.y -= GRAVITY * elapsed;
-        
-        // Apply y-axis velocity
-        entity->position.y += entity->velocity.y * elapsed;
-        CollideWithMap(*entity, COLLIDE_Y);
-        
-        // Apply x-axis velocity
-        entity->position.x += entity->velocity.x * elapsed;
-        CollideWithMap(*entity, COLLIDE_X);
-        
-        SheetSprite* frame = entity->animations[entity->currentAction]->GetCurrentFrame();
-        if (frame != entity->sprite) {
-            entity->SetSprite(frame);
-        }
+        UpdatePhysics(*entity, elapsed);
+        UpdateAnimation(*entity, elapsed);
     }
     
     // Keep player in bounds of map

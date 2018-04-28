@@ -49,10 +49,13 @@ void Entity::Render(ShaderProgram& program) {
     
     else {
         // Invert sprite direction depending on movement
-        if ((sprite->reversed && velocity.x > 0) ||
-            (!sprite->reversed && velocity.x < 0)) {
-            sprite->reversed = !sprite->reversed;
+        if (facingRight && velocity.x < 0) {
+            facingRight = false;
         }
+        else if (!facingRight && velocity.x > 0) {
+            facingRight = true;
+        }
+        sprite->reversed = !facingRight;
         sprite->Render(program);
     }
 }

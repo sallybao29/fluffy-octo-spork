@@ -61,8 +61,8 @@ public:
      * @param gridY The place to store the converted y coordinate
      */
     void worldToTileCoordinates(float worldX, float worldY, int& gridX, int& gridY) const;
-    int worldToTileCoordX(float worldX) const ;
-    int worldToTileCoordY(float worldY) const ;
+    int worldToTileCoordX(float worldX) const;
+    int worldToTileCoordY(float worldY) const;
     
     /*!
      * @discussion Tile data is stored as integers starting from 1, which correspond to sprite indices

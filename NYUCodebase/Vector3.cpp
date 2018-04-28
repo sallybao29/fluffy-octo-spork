@@ -31,3 +31,11 @@ Vector3 operator * (const Matrix& matrix, const Vector3& vector) {
     return resultant;
 }
 
+float distance(const Vector3& v1, const Vector3& v2) {
+    float xDiff = v1.x - v2.x;
+    float yDiff = v1.y - v2.y;
+    float zDiff = v1.z - v2.z;
+    
+    return sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+}
+

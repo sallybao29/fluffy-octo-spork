@@ -43,6 +43,13 @@ enum EntityAction {
     ACTION_NONE
 };
 
+enum AIState {
+    STATE_IDLE,
+    STATE_CHASING,
+    STATE_RETURNING,
+    STATE_ATTACKING
+};
+
 /*!
  * @discussion Represents an entity in a game
  * @warning A copy constructor has not been implemented yet, so please don't ever make a copy
@@ -70,7 +77,7 @@ public:
      */
     Entity(float x, float y, SheetSprite *sprite, EntityType type = ENTITY_NONE);
     
-    ~Entity();
+    virtual ~Entity();
     
     /*!
      * @discussion Advances the entity's state by a certain amount of time. Resets contact flags

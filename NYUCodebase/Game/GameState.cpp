@@ -1,8 +1,9 @@
 #include <unordered_set>
 #include <sstream>
 #include "GameState.hpp"
+#include "Flyer.hpp"
 
-#define ACCELERATION 0.7f
+#define ACCELERATION 1.0f
 #define MAX_VELOCITY_X 3.0f
 #define JUMP_VELOCITY 3.5f
 #define FRICTION 0.6f
@@ -16,7 +17,9 @@
 std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256,
+    // Green world
+    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
@@ -50,12 +53,12 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityX = x * map->tileSize + map->tileSize / 2;
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
-    // Create entity at position (entityX, entityY)
-    Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-    entities.push_back(entity);
-    
     // Player entity
     if (strcmp(type.data(), "playerBlue") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         player = entity;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
@@ -74,13 +77,19 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     }
     // Flying enemy
     else if (strcmp(type.data(), "enemyFlying") == 0) {
-        entity->entityType = ENTITY_FLYING;
-        entity->currentAction = ACTION_FLYING;
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Flyer(entityX, entityY, 3.0f);
+        entities.push_back(entity);
+
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
     // Floating enemy
     else if (strcmp(type.data(), "enemyFloating") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         entity->entityType = ENTITY_FLOATING;
         entity->currentAction = ACTION_DEFENDING;
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
@@ -88,6 +97,10 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     }
     // Walking enemy
     else if (strcmp(type.data(), "enemyWalking") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         entity->entityType = ENTITY_WALKING;
         entity->currentAction = ACTION_WALKING;
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
@@ -175,7 +188,6 @@ void GameState::CollideWithMap(Entity& entity, int direction) {
 
 /*------------------------------------ Processing Input -------------------------------------------*/
 void GameState::ProcessInput() {
-    player->acceleration.x = 0.0f;
     player->acceleration.y = 0.0f;
     
     while (SDL_PollEvent(&event)) {
@@ -207,7 +219,13 @@ void GameState::ProcessInput() {
         }
         else {
             player->velocity.x = 0.0f;
+        }/*
+        if (keys[SDL_SCANCODE_A]) {
+            player->acceleration.x = ACCELERATION;
         }
+        else {
+            player->acceleration.x = 0.0f;
+        }*/
     }
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
@@ -235,6 +253,12 @@ void GameState::ProcessInput() {
 
 /*--------------------------------------- Updating ------------------------------------------------*/
 void GameState::UpdatePhysics(Entity& entity, float elapsed) {
+    // Offset gravity so enemy can fly
+    if (entity.entityType == ENTITY_FLYING) {
+        entity.acceleration.y = GRAVITY;
+        Flyer* flyer = (Flyer*)&entity;
+        flyer->Update(*player, elapsed);
+    }
     // Reset all contact flags
     entity.Update(elapsed);
     
@@ -296,8 +320,7 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             break;
         case ENTITY_FLYING:
             // For now, it just flies in place
-            entity.animations[entity.currentAction]->NextFrame(0.15 * frameSpeed);
-            // TODO
+            entity.animations[entity.currentAction]->NextFrame(0.10 * frameSpeed);
             break;
         default:
             break;

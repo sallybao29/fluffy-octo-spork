@@ -139,14 +139,14 @@ void GameState::ProcessInput() {
                     timer.start();
                 }
             }
-        }
+        }/*
         // Revert from defense form to previous state
         else if (event.type == SDL_KEYUP) {
             if (event.key.keysym.scancode == SDL_SCANCODE_D) {
                 player->currentAction = player->previousAction;
                 player->previousAction = ACTION_DEFENDING;
             }
-        }
+        }*/
     }
     // Walking
     // Defense form cannot move
@@ -164,10 +164,10 @@ void GameState::ProcessInput() {
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 1.0f;
+            player->velocity.x = 0.7f;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -1.0f;
+            player->velocity.x = -0.7f;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -177,10 +177,11 @@ void GameState::ProcessInput() {
     }
     // Defending
     if (keys[SDL_SCANCODE_D]) {
-        if (player->currentAction != ACTION_DEFENDING) {
-            player->previousAction = player->currentAction;
-            player->currentAction = ACTION_DEFENDING;
-        }
+        player->currentAction = ACTION_DEFENDING;
+    }
+    else if (player->currentAction == ACTION_DEFENDING) {
+        player->previousAction = ACTION_DEFENDING;
+        player->currentAction = ACTION_WALKING;
     }
 }
 
@@ -272,7 +273,7 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             }
             // If player is walking
             if (player->currentAction == ACTION_WALKING) {
-                if (player->velocity.x == 0)
+                if (player->velocity.x == 0 || !player->collidedBottom)
                     player->animations[player->currentAction]->Reset();
                 else
                     // Speed of animation frame update is proportional to player's velocity

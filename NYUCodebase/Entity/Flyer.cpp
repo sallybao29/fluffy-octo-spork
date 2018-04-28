@@ -18,6 +18,11 @@ bool Flyer::InRange(const Entity& entity) const {
     return distance(position, entity.position) < range;
 }
 
+void Flyer::Approach(Vector3 pos) {
+    velocity.x = position.x - pos.x > 0 ? -speed : speed;
+    velocity.y = position.y - pos.y > 0 ? -speed : speed;
+}
+
 void Flyer::Update(Entity& target, float elapsed) {
     switch (state) {
         case STATE_IDLE:
@@ -29,29 +34,31 @@ void Flyer::Update(Entity& target, float elapsed) {
             }
             break;
         case STATE_CHASING:
-            velocity.x = position.x - target.position.x > 0 ? -speed : speed;
-            velocity.y = position.y - target.position.y > 0 ? -speed : speed;
+            Approach(target.position);
             
             if (!InRange(target)) {
-                state = STATE_RETURNING;
+                state = STATE_IDLE;
+                origin = position;
             }
             else if (target.currentAction == ACTION_DEFENDING) {
                 if (chaseTime > ACTIVE_TIME_MAX) {
                     state = STATE_RETURNING;
                     chaseTime = 0.0f;
                 }
-                else
+                else {
                     chaseTime += elapsed;
+                    velocity.x = 0.0f;
+                    velocity.y = 0.0f;
+                }
             }
             break;
         case STATE_RETURNING:
-            velocity.x = position.x - origin.x > 0 ? -speed : speed;
-            velocity.y = position.y - origin.y > 0 ? -speed : speed;
+            Approach(origin);
             
             if (InRange(target) && target.currentAction != ACTION_DEFENDING) {
                 state = STATE_CHASING;
             }
-            else if (distance(position, origin) < 0.0001f) {
+            else if (distance(position, origin) < 0.01f) {
                 state = STATE_IDLE;
             }
             break;

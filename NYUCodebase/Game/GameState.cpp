@@ -3,7 +3,7 @@
 #include "GameState.hpp"
 #include "Flyer.hpp"
 
-#define ACCELERATION 1.0f
+#define ACCELERATION 15.0f
 #define MAX_VELOCITY_X 3.0f
 #define JUMP_VELOCITY 3.5f
 #define FRICTION 0.6f
@@ -38,15 +38,6 @@ GameState::~GameState() {
 
 void GameState::Initialize() {
     LoadLevel();
-
-    // Create entities
-    for (int i = 0; i < map->entities.size(); i++) {
-        PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
-    }
-    // Ensure that the player has been created
-    if (player == nullptr) {
-        assert(false);
-    }
 }
 
 void GameState::PlaceEntity(std::string type, float x, float y) {
@@ -78,7 +69,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Flying enemy
     else if (strcmp(type.data(), "enemyFlying") == 0) {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Flyer(entityX, entityY, 3.0f);
+        Entity* entity = new Flyer(entityX, entityY, 1.5f);
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
@@ -120,16 +111,25 @@ void GameState::LoadLevel() {
     map = new FlareMap(0.3f);
     map->Load(stream.str());
     map->SetSpriteSheet(textures[TILES], 22, 12);
+    
+    // Create entities
+    for (size_t i = 0; i < entities.size(); i++) {
+        delete entities[i];
+    }
+    entities.clear();
+    
+    for (int i = 0; i < map->entities.size(); i++) {
+        PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
+    }
+    // Ensure that the player has been created
+    if (player == nullptr) {
+        assert(false);
+    }
 }
 
 void GameState::Reset() {
-    if (level == 1) {
-        // reset code here, don't need to reload the map
-    }
-    else {
-        level = 1;
-        LoadLevel();
-    }
+    level = 1;
+    LoadLevel();
 }
 
 /*----------------------------------- Collision Resolution ------------------------------------------*/
@@ -189,6 +189,7 @@ void GameState::CollideWithMap(Entity& entity, int direction) {
 /*------------------------------------ Processing Input -------------------------------------------*/
 void GameState::ProcessInput() {
     player->acceleration.y = 0.0f;
+    player->acceleration.x = 0.0f;
     
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -219,21 +220,18 @@ void GameState::ProcessInput() {
         }
         else {
             player->velocity.x = 0.0f;
-        }/*
-        if (keys[SDL_SCANCODE_A]) {
-            player->acceleration.x = ACCELERATION;
         }
-        else {
-            player->acceleration.x = 0.0f;
-        }*/
+        if (fabs(player->velocity.x) > 0 && keys[SDL_SCANCODE_A]) {
+            player->acceleration.x = player->velocity.x > 0 ? ACCELERATION : -ACCELERATION;
+        }
     }
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 0.7f;
+            player->velocity.x = 1.0f;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -0.7f;
+            player->velocity.x = -1.0f;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -253,12 +251,6 @@ void GameState::ProcessInput() {
 
 /*--------------------------------------- Updating ------------------------------------------------*/
 void GameState::UpdatePhysics(Entity& entity, float elapsed) {
-    // Offset gravity so enemy can fly
-    if (entity.entityType == ENTITY_FLYING) {
-        entity.acceleration.y = GRAVITY;
-        Flyer* flyer = (Flyer*)&entity;
-        flyer->Update(*player, elapsed);
-    }
     // Reset all contact flags
     entity.Update(elapsed);
     
@@ -306,17 +298,10 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             player->animations[player->currentAction]->NextFrame(frameSpeed);
             break;
         case ENTITY_WALKING:
-            // TODO
+            entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
             break;
         case ENTITY_FLOATING:
-            // Activates when player enters range
-            if (fabs(player->position.x - entity.position.x) < 0.5f) {
-                entity.currentAction = ACTION_ATTACKING;
-            }
-            // Otherwise idle
-            else {
-                entity.currentAction = ACTION_DEFENDING;
-            }
+            // TODO
             break;
         case ENTITY_FLYING:
             // For now, it just flies in place
@@ -333,10 +318,27 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 }
 
 void GameState::Update(float elapsed) {
-    for (int i = 0; i < entities.size(); i++) {
+    for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
+        
+        // Offset gravity so enemy can fly
+        if (entity->entityType == ENTITY_FLYING) {
+            entity->acceleration.y = GRAVITY;
+            Flyer* flyer = (Flyer*)entity;
+            flyer->Update(*player, elapsed);
+        }
+        
         UpdatePhysics(*entity, elapsed);
         UpdateAnimation(*entity, elapsed);
+    }
+    
+    for (size_t i = 0; i < entities.size(); i++) {
+        Entity* entity = entities[i];
+        if (entity == player) continue;
+        bool collided = player->CollidesWith(*entity);
+        if (collided) {
+            Reset();
+        }
     }
     
     // Keep player in bounds of map

@@ -35,6 +35,15 @@ public:
      */
     bool GetSpriteData(const std::string& name, float& x, float& y, float& width, float& height) const;
     
+    /*!
+     * @discussion Finds the subtextures with the given name attribute and populates a vector with their data
+     * @param name The value of the name attribute to match on
+     * @param spriteData A reference to a vector that will be populated with x, y, width, height data
+     * @param maxSprites Limits the number of matching subtextures to be at most this many
+     * @return Whether the matching subtextures were found and the data was successfully parsed
+     */
+    bool GetSpritesData(const std::string& name, std::vector<float>& spriteData, int maxSprites = -1) const;
+    
 private:
     /// The file containing the xml texture atlas data. Must persist for as long as doc is being used
     rapidxml::file<>* file;

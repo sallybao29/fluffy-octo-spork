@@ -18,10 +18,9 @@ public:
      * @param v The normalized v coordinate of the sprite on the texture
      * @param width The normalized width of the sprite
      * @param height The normalized height of the sprite
-     * @param aspect The original width-to-height ratio of the sprite on the texture
      * @param size The scale factor to apply to the normalized sprite size
      */
-    SheetSprite(unsigned int textureID, float u, float v, float width, float height, float aspect, float size);
+    SheetSprite(unsigned int textureID, float u, float v, float width, float height, float size);
     
     /*!
      * @discussion Initializes a uniform sprite
@@ -29,10 +28,9 @@ public:
      * @param index The index of the sprite on the texture
      * @param spriteCountX The number of columns that the texture contains
      * @param spriteCountY The number of rows that the texture contains
-     * @param aspect The original width-to-height ratio of the sprite on the texture
      * @param size The scale factor to apply to the normalized sprite size
      */
-    SheetSprite(unsigned int textureID, int index, int spriteCountX, int spriteCountY, float aspect, float size);
+    SheetSprite(unsigned int textureID, int index, int spriteCountX, int spriteCountY, float size);
     
     /*!
      * @abstract Renders the sprite
@@ -54,8 +52,6 @@ public:
     /// The normalized height of the sprite
     float height;
     
-    /// The original width-to-height ratio of the sprite on the texture
-    float aspect;
     /// The scale factor to apply to the normalized sprite size
     float size;
     

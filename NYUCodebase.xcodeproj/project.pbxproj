@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */; };
+		486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 486AE322208C4109008A6F70 /* SpriteAnimation.cpp */; };
 		4861880E2092AB3E006C8722 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4861880C2092AB3E006C8722 /* Timer.cpp */; };
 		4898130A20803B5200D9B749 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4898130820803B5200D9B749 /* Vector3.cpp */; };
 		4898131020803E5900D9B749 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4898130F20803E5900D9B749 /* Resources */; };
@@ -39,6 +40,8 @@
 		484BEC0420898E8900B8CA79 /* rapidxml_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rapidxml_utils.hpp; path = NYUCodebase/rapidxml_utils.hpp; sourceTree = SOURCE_ROOT; };
 		484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextureAtlasParser.cpp; sourceTree = "<group>"; };
 		484BEC062089A3AD00B8CA79 /* TextureAtlasParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextureAtlasParser.hpp; sourceTree = "<group>"; };
+		486AE322208C4109008A6F70 /* SpriteAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SpriteAnimation.cpp; sourceTree = "<group>"; };
+		486AE323208C4109008A6F70 /* SpriteAnimation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SpriteAnimation.hpp; sourceTree = "<group>"; };
 		4861880C2092AB3E006C8722 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		4861880D2092AB3E006C8722 /* Timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Timer.hpp; sourceTree = "<group>"; };
 		4898130820803B5200D9B749 /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector3.cpp; sourceTree = "<group>"; };
@@ -108,6 +111,15 @@
 				484BEC062089A3AD00B8CA79 /* TextureAtlasParser.hpp */,
 			);
 			path = XMLParser;
+			sourceTree = "<group>";
+		};
+		486AE325208D034D008A6F70 /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				486AE322208C4109008A6F70 /* SpriteAnimation.cpp */,
+				486AE323208C4109008A6F70 /* SpriteAnimation.hpp */,
+			);
+			path = Animation;
 			sourceTree = "<group>";
 		};
 		4898130B20803C1200D9B749 /* ShaderProgram */ = {
@@ -232,6 +244,8 @@
 		6D5A86E119AE5CAA0066C1FD /* Code */ = {
 			isa = PBXGroup;
 			children = (
+				486AE325208D034D008A6F70 /* Animation */,
+				484BEC0320898E7500B8CA79 /* XMLParser */,
 				4898130D20803CE800D9B749 /* Entity */,
 				4898130C20803CAB00D9B749 /* Game */,
 				6D5A86B919AE5C710066C1FD /* main.cpp */,
@@ -275,7 +289,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = NYUCB;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "Ivan Safrin";
 			};
 			buildConfigurationList = 6D5A86A519AE5C710066C1FD /* Build configuration list for PBXProject "NYUCodebase" */;
@@ -321,6 +335,7 @@
 			files = (
 				4898130A20803B5200D9B749 /* Vector3.cpp in Sources */,
 				48D414BC2063122A00FC4896 /* Entity.cpp in Sources */,
+				486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */,
 				4861880E2092AB3E006C8722 /* Timer.cpp in Sources */,
 				48D414AF2062E30400FC4896 /* FlareMap.cpp in Sources */,
 				6DEF23C31B96CC2600BCE792 /* ShaderProgram.cpp in Sources */,
@@ -377,12 +392,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -427,12 +444,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

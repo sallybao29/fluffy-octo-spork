@@ -19,7 +19,7 @@ TextureAtlasParser::~TextureAtlasParser() {
 const rapidxml::xml_node<>* TextureAtlasParser::GetSubTexture(const std::string& attribute, const std::string& value) const {
     for (const rapidxml::xml_node<>* texNode = root->first_node(); texNode != nullptr; texNode = texNode->next_sibling()) {
         const rapidxml::xml_attribute<>* texAttrib = texNode->first_attribute(attribute.data());
-        if (texAttrib != nullptr && strcmp(texAttrib->value(), value.data()) == 0) {
+        if (texAttrib != nullptr && strstr(texAttrib->value(), value.data()) != nullptr) {
             return texNode;
         }
     }
@@ -35,6 +35,34 @@ bool TextureAtlasParser::GetSpriteData(const std::string& name, float& x, float&
     y = strtof(subTexture->first_attribute("y")->value(), nullptr);
     width = strtof(subTexture->first_attribute("width")->value(), nullptr);
     height = strtof(subTexture->first_attribute("height")->value(), nullptr);
+    
+    return true;
+}
+
+bool TextureAtlasParser::GetSpritesData(const std::string& name, std::vector<float>& spriteData, int maxSprites) const {
+    const rapidxml::xml_node<>* subTexture = GetSubTexture("name", name);
+    if (subTexture == nullptr) {
+        return false;
+    }
+    
+    // While there are textures after this one that that have a matching name attribute, populate spriteData
+    for (const rapidxml::xml_node<>* texNode = subTexture; texNode != nullptr; texNode = texNode->next_sibling()) {
+        const rapidxml::xml_attribute<>* texAttrib = texNode->first_attribute("name");
+        if (texAttrib == nullptr || strstr(texAttrib->value(), name.data()) == nullptr) {
+            break;
+        }
+        float x, y, width, height;
+        x = strtof(texNode->first_attribute("x")->value(), nullptr);
+        y = strtof(texNode->first_attribute("y")->value(), nullptr);
+        width = strtof(texNode->first_attribute("width")->value(), nullptr);
+        height = strtof(texNode->first_attribute("height")->value(), nullptr);
+        spriteData.insert(spriteData.end(), { x, y, width, height });
+        
+        maxSprites--;
+        if (maxSprites == 0) {
+            return true;
+        }
+    }
     
     return true;
 }

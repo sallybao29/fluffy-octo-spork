@@ -19,6 +19,7 @@ std::unordered_set<unsigned int> solidTiles =
     0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256
 };
 
+/*----------------------------------- Initialization/Setup ------------------------------------------*/
 GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
 
 GameState::~GameState() {
@@ -34,42 +35,63 @@ GameState::~GameState() {
 
 void GameState::Initialize() {
     LoadLevel();
-    
+
     // Create entities
     for (int i = 0; i < map->entities.size(); i++) {
         PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
     }
-    
+    // Ensure that the player has been created
     if (player == nullptr) {
         assert(false);
     }
 }
 
 void GameState::PlaceEntity(std::string type, float x, float y) {
-    // Generate subtexture name
-    std::stringstream subTextureName;
-    subTextureName << type << ".png";
-    
-    // Get sprite data from texture atlas
-    float spriteX, spriteY, width, height;
-    textureAtlas.GetSpriteData(subTextureName.str(), spriteX, spriteY, width, height);
- 
-    // Create sprite from atlas data
-    SheetSprite* sprite = new SheetSprite(textures[OBJECTS], spriteX / 1024, spriteY / 1024, width / 1024, height / 1024, width / height, 0.3f);
-    
-    // Calculate entity position in world coordinates based on tile coordinates
     float entityX = x * map->tileSize + map->tileSize / 2;
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
-    // Determine the entity's type
-    // FIXUP: Find a less janky way of determining the entity type, preferably not by string parsing
-    EntityType entityType = strstr(type.data(), "player") != nullptr ? ENTITY_PLAYER : ENTITY_ENEMY;
-    // Create entity
-    Entity* entity = new Entity(entityX, entityY, sprite, entityType);
+    // Create entity at position (entityX, entityY)
+    Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
     entities.push_back(entity);
     
-    if (entityType == ENTITY_PLAYER) {
+    // Player entity
+    if (strcmp(type.data(), "playerBlue") == 0) {
         player = entity;
+        player->currentAction = ACTION_WALKING;
+        player->entityType = ENTITY_PLAYER;
+        
+        // Walking
+        player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
+        player->animations[ACTION_WALKING]->SetSpeed(20);
+        // Defending
+        player->AddAnimation(ACTION_DEFENDING, "playerBlue_roll", 3, LOOP_NONE);
+        // Swimming
+        player->AddAnimation(ACTION_SWIMMING, "playerBlue_swim", 3, LOOP_REPEAT);
+        player->animations[ACTION_SWIMMING]->SetSpeed(25);
+        // Jumping
+        player->AddAnimation(ACTION_JUMPING, "playerBlue_up", 3, LOOP_ONCE);
+        player->animations[ACTION_JUMPING]->SetSpeed(30);
+    }
+    // Flying enemy
+    else if (strcmp(type.data(), "enemyFlying") == 0) {
+        entity->entityType = ENTITY_FLYING;
+        entity->currentAction = ACTION_FLYING;
+        entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_FLYING]->SetSpeed(30);
+    }
+    // Floating enemy
+    else if (strcmp(type.data(), "enemyFloating") == 0) {
+        entity->entityType = ENTITY_FLOATING;
+        entity->currentAction = ACTION_DEFENDING;
+        entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
+        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
+    }
+    // Walking enemy
+    else if (strcmp(type.data(), "enemyWalking") == 0) {
+        entity->entityType = ENTITY_WALKING;
+        entity->currentAction = ACTION_WALKING;
+        entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_WALKING]->SetSpeed(30);
     }
 }
 
@@ -97,49 +119,7 @@ void GameState::Reset() {
     }
 }
 
-void GameState::ProcessInput() {
-    player->acceleration.x = 0;
-    player->acceleration.y = 0;
-    
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-            done = true;
-        }
-        else if (event.type == SDL_KEYDOWN) {
-            // Can only jump if ground below is solid
-            if (player->collidedBottom) {
-                if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
-                    player->velocity.y = JUMP_VELOCITY;
-                    timer.start();
-                }
-            }
-        }
-    }
-    // Can only accelerate when standing on something
-    if (player->collidedBottom) {
-        if (keys[SDL_SCANCODE_RIGHT] && player->velocity.x < MAX_VELOCITY_X) {
-            player->acceleration.x = ACCELERATION;
-        }
-        else if (keys[SDL_SCANCODE_LEFT] && player->velocity.x > -MAX_VELOCITY_X) {
-            player->acceleration.x = -ACCELERATION;
-        }
-    }
-    // If jumping, allow left/right velocity to be set
-    else if (timer.isRunning()) {
-        if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 1.0f;
-        }
-        else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -1.0f;
-        }
-        // End of jump
-        if (timer.isOver(0.3f)) {
-            player->velocity.y = 0.0f;
-            timer.reset();
-        }
-    }
-}
-
+/*----------------------------------- Collision Resolution ------------------------------------------*/
 bool GameState::ResolveCollisionY(Entity& entity, int x, int y, float size) {
     // Only resolve collision if tile is solid
     if (x < 0 || y < 0 ||
@@ -193,31 +173,147 @@ void GameState::CollideWithMap(Entity& entity, int direction) {
     }
 }
 
+/*------------------------------------ Processing Input -------------------------------------------*/
+void GameState::ProcessInput() {
+    player->acceleration.x = 0.0f;
+    player->acceleration.y = 0.0f;
+    
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+            done = true;
+        }
+        else if (event.type == SDL_KEYDOWN) {
+            // Can only jump if ground below is solid
+            // Defense form cannot move
+            if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
+                if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+                    player->velocity.y = JUMP_VELOCITY;
+                    player->currentAction = ACTION_JUMPING;
+                    // Reset the jumping animation
+                    player->animations[ACTION_JUMPING]->Reset();
+                    timer.start();
+                }
+            }
+        }
+    }
+    // Walking
+    // Defense form cannot move
+    if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
+        if (keys[SDL_SCANCODE_RIGHT]) {
+            player->velocity.x = 0.5f;
+        }
+        else if (keys[SDL_SCANCODE_LEFT]) {
+            player->velocity.x = -0.5f;
+        }
+        else {
+            player->velocity.x = 0.0f;
+        }
+    }
+    // If jumping, allow left/right velocity to be set
+    else if (timer.isRunning()) {
+        if (keys[SDL_SCANCODE_RIGHT]) {
+            player->velocity.x = 0.7f;
+        }
+        else if (keys[SDL_SCANCODE_LEFT]) {
+            player->velocity.x = -0.7f;
+        }
+        // End of jump
+        if (timer.isOver(0.3f)) {
+            player->velocity.y = 0.0f;
+            timer.reset();
+        }
+    }
+    // Defending
+    if (keys[SDL_SCANCODE_D]) {
+        if (player->currentAction != ACTION_DEFENDING)
+        player->currentAction = ACTION_DEFENDING;
+    }
+    else if (player->currentAction == ACTION_DEFENDING) {
+        player->currentAction = ACTION_WALKING;
+    }
+}
+
+/*--------------------------------------- Updating ------------------------------------------------*/
+void GameState::UpdatePhysics(Entity& entity, float elapsed) {
+    // Reset all contact flags
+    entity.Update(elapsed);
+    
+    // Apply friction
+    entity.velocity.x = lerp(entity.velocity.x, 0.0f, elapsed * FRICTION);
+    entity.velocity.y = lerp(entity.velocity.y, 0.0f, elapsed * FRICTION);
+    
+    // Apply acceleration
+    entity.velocity.x += entity.acceleration.x * elapsed;
+    entity.velocity.y += entity.acceleration.y * elapsed;
+    
+    // Apply gravity
+    entity.velocity.y -= GRAVITY * elapsed;
+    
+    // Apply y-axis velocity
+    entity.position.y += entity.velocity.y * elapsed;
+    CollideWithMap(entity, COLLIDE_Y);
+    
+    // Apply x-axis velocity
+    entity.position.x += entity.velocity.x * elapsed;
+    CollideWithMap(entity, COLLIDE_X);
+}
+
+void GameState::UpdateAnimation(Entity& entity, float elapsed) {
+    float frameSpeed = elapsed;
+    switch (entity.entityType) {
+        case ENTITY_PLAYER:
+            // If the player has just landed after jumping, change their animation back to walking
+            if (player->collidedBottom && player->currentAction == ACTION_JUMPING) {
+                player->currentAction = ACTION_WALKING;
+            }
+            // If player is walking
+            if (player->currentAction == ACTION_WALKING) {
+                if (player->velocity.x == 0 || !player->collidedBottom)
+                    player->animations[player->currentAction]->Reset();
+                else
+                    // Speed of animation frame update is proportional to player's x velocity
+                    frameSpeed = fabs(player->velocity.x) * elapsed;
+            }
+            else if (player->currentAction == ACTION_JUMPING) {
+                // Speed of animation frame update is proportional to player's y velocity
+                frameSpeed = fabs(player->velocity.y) * elapsed;
+            }
+            // Advance the animation frame
+            player->animations[player->currentAction]->NextFrame(frameSpeed);
+            break;
+        case ENTITY_WALKING:
+            // TODO
+            break;
+        case ENTITY_FLOATING:
+            // Activates when player enters range
+            if (fabs(player->position.x - entity.position.x) < 0.5f) {
+                entity.currentAction = ACTION_ATTACKING;
+            }
+            // Otherwise idle
+            else {
+                entity.currentAction = ACTION_DEFENDING;
+            }
+            break;
+        case ENTITY_FLYING:
+            // For now, it just flies in place
+            entity.animations[entity.currentAction]->NextFrame(0.15 * frameSpeed);
+            // TODO
+            break;
+        default:
+            break;
+    }
+    // Retrieve the sprite for the current frame
+    SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
+    if (frame != entity.sprite) {
+        entity.SetSprite(frame);
+    }
+}
+
 void GameState::Update(float elapsed) {
     for (int i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
-        
-        // Reset all contact flags
-        entity->Update(elapsed);
-        
-        // Apply friction
-        entity->velocity.x = lerp(entity->velocity.x, 0.0f, elapsed * FRICTION);
-        entity->velocity.y = lerp(entity->velocity.y, 0.0f, elapsed * FRICTION);
-        
-        // Apply acceleration
-        entity->velocity.x += entity->acceleration.x * elapsed;
-        entity->velocity.y += entity->acceleration.y * elapsed;
-        
-        // Apply gravity
-        entity->velocity.y -= GRAVITY * elapsed;
-        
-        // Apply y-axis velocity
-        entity->position.y += entity->velocity.y * elapsed;
-        CollideWithMap(*entity, COLLIDE_Y);
-        
-        // Apply x-axis velocity
-        entity->position.x += entity->velocity.x * elapsed;
-        CollideWithMap(*entity, COLLIDE_X);
+        UpdatePhysics(*entity, elapsed);
+        UpdateAnimation(*entity, elapsed);
     }
     
     // Keep player in bounds of map
@@ -229,10 +325,8 @@ void GameState::Update(float elapsed) {
     }
 }
 
+/*------------------------------------------- Rendering ----------------------------------------------*/
 void GameState::Render() {
-    modelMatrix.Identity();
-    shader->SetModelMatrix(modelMatrix);
-    
     // Calculate bounds of scrolling
     float viewX = player->position.x;
     float viewY = -(map->mapHeight * map->tileSize - projection.y);
@@ -253,41 +347,45 @@ void GameState::Render() {
     shader->SetViewMatrix(viewMatrix);
     
     // Draw background
+    RenderBackground(viewX, viewY);
+    
+    // Draw map
     modelMatrix.Identity();
-    modelMatrix.Scale (map->mapWidth, map->mapHeight, 1.0f);
-    shader -> SetModelMatrix(modelMatrix);
+    shader->SetModelMatrix(modelMatrix);
+    map->Render(*shader);
+    
+    // Draw entities
+    for (size_t i = 0; i < entities.size(); i++) {
+        entities[i]->Render(*shader);
+    }
+}
+
+void GameState::RenderBackground(float viewX, float viewY) {
+    // Draw background
+    modelMatrix.Identity();
+    modelMatrix.Scale(map->mapWidth, map->mapHeight, 1.0f);
+    shader->SetModelMatrix(modelMatrix);
     std::stringstream stream;
-    stream << "background_" << level ;
+    stream << "background_" << level;
     DrawTexture(*shader, textures[stream.str()]);
     
     // Draw background tiles
     modelMatrix.Identity();
-    modelMatrix.SetPosition (viewX, viewY, 0.0f);
-    modelMatrix.Scale (projection.x * 2, projection.y *2  , 1.0f);
-    shader -> SetModelMatrix( modelMatrix);
+    modelMatrix.SetPosition(viewX, viewY, 0.0f);
+    modelMatrix.Scale(projection.x * 2, projection.y * 2, 1.0f);
+    shader->SetModelMatrix(modelMatrix);
     stream.str ("");
-    stream << "tiles_" << level ;
+    stream << "tiles_" << level;
     DrawTexture(*shader, textures[stream.str()]);
     
     // Draw background hills
-    modelMatrix.Identity ();
-    modelMatrix.SetPosition (viewX + projection.x * 0.25, viewY + projection.y * 0.375 , 0.0f);
-    modelMatrix.Scale (projection.x * 2.5, projection.y * 2.5, 1.0f);
-    shader -> SetModelMatrix(modelMatrix);
+    modelMatrix.Identity();
+    modelMatrix.SetPosition(viewX + projection.x * 0.25, viewY + projection.y * 0.375 , 0.0f);
+    modelMatrix.Scale(projection.x * 2.5, projection.y * 2.5, 1.0f);
+    shader->SetModelMatrix(modelMatrix);
     stream.str ("");
-    stream << "hills_" << level ;
+    stream << "hills_" << level;
     DrawTexture(*shader, textures[stream.str()]);
-    
-    // Draw map
-    modelMatrix.Identity ();
-    shader -> SetModelMatrix(modelMatrix);
-    map->Render(*shader);
-    
-    // Draw entities
-   
-    for (size_t i = 0; i < entities.size(); i++) {
-        entities[i]->Render(*shader);
-    }
 }
 
 

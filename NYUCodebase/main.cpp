@@ -121,7 +121,7 @@ void Setup() {
     glUseProgram(program.programID);
     
     // Load textures
-    GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_LINEAR);
+    GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_NEAREST);
     GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_LINEAR);
     
     // Store texture references in lookup table

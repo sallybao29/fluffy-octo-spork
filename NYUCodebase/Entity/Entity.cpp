@@ -14,7 +14,7 @@ Entity::Entity(float x, float y, const Shape& shape, EntityType type)
 Entity::Entity(float x, float y, SheetSprite *sprite, EntityType type)
 : position(x, y, 0.0f), scale(1.0f, 1.0f, 1.0f), sprite(sprite), entityType(type) {
     
-    this->shape = new Rectangle(sprite->aspect * sprite->size, sprite->size);
+    this->shape = new Rectangle(2 * sprite->width * sprite->size, 2 * sprite->height * sprite->size);
 }
 
 Entity::Entity() {}
@@ -24,15 +24,14 @@ Entity::~Entity() {
         delete shape;
         shape = nullptr;
     }
-    if (sprite != nullptr) {
-        delete sprite;
-        sprite = nullptr;
+    for (std::pair<EntityAction, SpriteAnimation*> animation : animations) {
+        delete animation.second;
     }
 }
 
 void Entity::SetSprite(SheetSprite* newSprite) {
     sprite = newSprite;
-    shape->SetSize(sprite->aspect * sprite->size, sprite->size);
+    shape->SetSize(2 * sprite->width * sprite->size, 2 * sprite->height * sprite->size);
 }
 
 void Entity::UpdateMatrix() {
@@ -53,10 +52,13 @@ void Entity::Render(ShaderProgram& program) {
     
     else {
         // Invert sprite direction depending on movement
-        if ((sprite->reversed && velocity.x > 0) ||
-            (!sprite->reversed && velocity.x < 0)) {
-            sprite->reversed = !sprite->reversed;
+        if (facingRight && velocity.x < 0) {
+            facingRight = false;
         }
+        else if (!facingRight && velocity.x > 0) {
+            facingRight = true;
+        }
+        sprite->reversed = !facingRight;
         sprite->Render(program);
     }
 }
@@ -138,3 +140,14 @@ void Entity::SetColor(float r, float g, float b, float a) {
     color[BLUE] = b;
     color[ALPHA] = a;
 }
+
+bool Entity::AddAnimation(EntityAction action, const std::string textureName, float spriteSize,
+                          LoopConvention loopStyle, int maxFrames) {
+    std::vector<float> spriteData;
+    
+    bool found = textureAtlas.GetSpritesData(textureName, spriteData, maxFrames);
+    animations[action] = new SpriteAnimation(textures[OBJECTS], spriteData,
+                                            1024, 1024, spriteSize, loopStyle);
+    return found;
+}
+

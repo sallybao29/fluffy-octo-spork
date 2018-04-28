@@ -2,9 +2,12 @@
 #define Entity_hpp
 
 #include <stdio.h>
+#include <map>
 #include "Vector3.hpp"
 #include "Shape.hpp"
 #include "SheetSprite.hpp"
+#include "SpriteAnimation.hpp"
+#include "FlareMap.hpp"
 
 #define RED 0
 #define GREEN 1
@@ -21,8 +24,23 @@ class Matrix;
 enum EntityType {
     /// A player entity
     ENTITY_PLAYER,
-    /// An enemy entity
-    ENTITY_ENEMY
+    // Enemy entities
+    ENTITY_FLYING,
+    ENTITY_WALKING,
+    ENTITY_SWIMMING,
+    ENTITY_SPIKEY,
+    ENTITY_FLOATING,
+    ENTITY_NONE
+};
+
+enum EntityAction {
+    ACTION_WALKING,
+    ACTION_JUMPING,
+    ACTION_DEFENDING,
+    ACTION_SWIMMING,
+    ACTION_ATTACKING,
+    ACTION_FLYING,
+    ACTION_NONE
 };
 
 /*!
@@ -41,7 +59,7 @@ public:
      * @param shape The shape of the entity's hit "box"
      * @param type The type of entity
      */
-    Entity(float x, float y, const Shape& shape, EntityType type);
+    Entity(float x, float y, const Shape& shape, EntityType type = ENTITY_NONE);
     
     /*!
      * @discussion Intializes a textured entity with the given position, sprite, and type
@@ -50,7 +68,7 @@ public:
      * @param sprite The sprite to render for the entity
      * @param type The type of entity
      */
-    Entity(float x, float y, SheetSprite *sprite, EntityType type);
+    Entity(float x, float y, SheetSprite *sprite, EntityType type = ENTITY_NONE);
     
     ~Entity();
     
@@ -97,6 +115,18 @@ public:
     bool CollidesWith(Entity& other);
     
     /*!
+     * @discussion Adds an animation for the given entity action
+     * @param action The action to map to
+     * @param textureName The root name of the subtexture that defines the animation
+     * @param spriteSize The size of the sprites in the animation
+     * @param loopStyle The way to animation loops
+     * @param maxFrames Limits the number of matching subtextures to be at most this many
+     * @return Whether the animation was successfully added
+     */
+    bool AddAnimation(EntityAction action, const std::string textureName, float spriteSize,
+                      LoopConvention loopStyle, int maxFrames = -1);
+
+    /*!
      * @discussion Checks if the entity is colliding with the given tile in the x direction and sets
      * its contact flags
      * @param x The x coordinate of the tile
@@ -111,9 +141,18 @@ public:
      * @return Whether the collision was resolved
      */
     bool CollidesWithY(float y, float height);
+
+    /// Whether the player is facing right
+    bool facingRight = true;
     
     /// The sprite to render for the entity
     SheetSprite* sprite = nullptr;
+    
+    /// Maps entity actions to animations
+    std::map<EntityAction, SpriteAnimation*> animations;
+    
+    /// The entity's current action
+    EntityAction currentAction;
     
     /// The position of the entity in world coordinates
     Vector3 position;

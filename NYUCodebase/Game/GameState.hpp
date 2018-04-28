@@ -36,12 +36,6 @@ public:
     void ProcessInput();
     
     /*!
-     * @discussion Checking collision between solids and player
-     */
-    
-    void Collision ();
-    
-    /*!
      * @discussion Updates the game state by an elapsed amount of time. New entity positions are determined
      * and collisions are resolved here.
      * @param elapsed The amount of time that has passed
@@ -53,8 +47,14 @@ public:
      */
     void Render();
     
-    
 private:
+    /*!
+     * @abstract Creates an entity of the given type at the given position
+     * @discussion Creates an entity based on its type and loads all of its animation frames
+     * @param type The type of the entity parsed from a FlareMap
+     * @param x The entity's x position on the map (in tiles)
+     * @param y The entity's y position on the map (in tiles)
+     */
     void PlaceEntity(std::string type, float x, float y);
     /*!
      * @discussion Checks for and resolves collision in either the x or y direction for an entity
@@ -83,11 +83,31 @@ private:
      */
     bool ResolveCollisionX(Entity& entity, int x, int y, float size);
     
+    /*!
+     * @discussion Advances the physics of the world by the elapsed amount of time and resolves
+     * collisions for entities
+     * @param entity The entity to update
+     * @param elapsed The amount of time that has elapsed
+     */
+    void UpdatePhysics(Entity& entity, float elapsed);
+    
+    /*!
+     * @discussion Updates the animation for the entity
+     * @param entity The entity to update
+     * @param elapsed The amount of time that has elapsed
+     */
+    void UpdateAnimation(Entity& entity, float elapsed);
+    
+    /*!
+     * @discussion Draws the background of the level
+     * @param viewX The x coordinate to draw the background at
+     * @param viewY The y coordinate to draw the background at
+     */
+    void RenderBackground(float viewX, float viewY);
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;
-
-    Matrix backgroundMatrix;
     
     FlareMap* map;
     

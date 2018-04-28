@@ -98,6 +98,13 @@ private:
      */
     void UpdateAnimation(Entity& entity, float elapsed);
     
+    /*!
+     * @discussion Draws the background of the level
+     * @param viewX The x coordinate to draw the background at
+     * @param viewY The y coordinate to draw the background at
+     */
+    void RenderBackground(float viewX, float viewY);
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;

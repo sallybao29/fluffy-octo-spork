@@ -151,9 +151,6 @@ public:
     /// Maps entity actions to animations
     std::map<EntityAction, SpriteAnimation*> animations;
     
-    /// The entity's previous action
-    EntityAction previousAction = ACTION_NONE;
-    
     /// The entity's current action
     EntityAction currentAction;
     

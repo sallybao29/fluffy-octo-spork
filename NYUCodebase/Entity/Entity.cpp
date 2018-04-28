@@ -24,6 +24,9 @@ Entity::~Entity() {
         delete shape;
         shape = nullptr;
     }
+    for (std::pair<EntityAction, SpriteAnimation*> animation : animations) {
+        delete animation.second;
+    }
 }
 
 void Entity::SetSprite(SheetSprite* newSprite) {

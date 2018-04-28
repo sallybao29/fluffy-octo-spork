@@ -15,8 +15,8 @@
 #include <map>
 #include "TextureAtlasParser.hpp"
 
-#define TILES 0
-#define OBJECTS 1
+#define TILES "tiles"
+#define OBJECTS "objecs"
 
 class Matrix;
 class Vector3;
@@ -60,9 +60,16 @@ void DrawText(ShaderProgram& program, int fontTexture, std::string text, float s
 void DrawShape(ShaderProgram& program, const Shape& shape);
 
 /*!
+ * @discussion Draws a texture with the given shader program
+ # @param program The shader program to use for rendering
+ # @param textureID The id of the texture to render
+ */
+void DrawTexture(ShaderProgram& program, GLuint textureID);
+
+/*!
  * @abstract Converts object space vertices to world space
  * @discussion Multiplies each Vector3 vertex by the given transformation matrix to
- *   produce a vector of world space coordinates
+ * produce a vector of world space coordinates
  * @param matrix The transformation matrix
  * @param points The vertices to convert
  * @return A vector of world space coordinates as (x, y) pairs
@@ -94,7 +101,7 @@ extern const Uint8 *keys;
 extern GameMode mode;
 
 /// Dictionary of textures loaded for the game
-extern std::map<int, GLuint> textures;
+extern std::map<std::string, GLuint> textures;
 
 extern TextureAtlasParser textureAtlas;
 

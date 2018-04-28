@@ -27,7 +27,6 @@ GLuint LoadTexture(const char *filePath, GLuint filter) {
 }
 
 void DrawText(ShaderProgram& program, int fontTexture, std::string text, float size, float spacing) {
-    
     float texture_size = 1.0/16.0f;
     std::vector<float> vertexData;
     std::vector<float> texCoordData;
@@ -73,6 +72,20 @@ void DrawShape(ShaderProgram& program, const Shape& shape) {
     glDrawArrays(GL_TRIANGLES, 0, (int)triangles.size() / 2);
     
     glDisableVertexAttribArray(program.positionAttribute);
+}
+
+void DrawTexture(ShaderProgram& program, GLuint textureID) {
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
+    glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+    glEnableVertexAttribArray(program.positionAttribute);
+    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+    glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+    glEnableVertexAttribArray(program.texCoordAttribute);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    glDisableVertexAttribArray(program.positionAttribute);
+    glDisableVertexAttribArray(program.texCoordAttribute);
 }
 
 std::vector<std::pair<float, float>> ToWorldSpace(const Matrix& matrix, const std::vector<Vector3>& points) {

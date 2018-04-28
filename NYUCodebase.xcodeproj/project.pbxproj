@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */; };
 		486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 486AE322208C4109008A6F70 /* SpriteAnimation.cpp */; };
+		4861880E2092AB3E006C8722 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4861880C2092AB3E006C8722 /* Timer.cpp */; };
 		4898130A20803B5200D9B749 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4898130820803B5200D9B749 /* Vector3.cpp */; };
 		4898131020803E5900D9B749 /* Resources in Resources */ = {isa = PBXBuildFile; fileRef = 4898130F20803E5900D9B749 /* Resources */; };
 		48D414AC2062DC8100FC4896 /* GameState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D414AA2062DC8100FC4896 /* GameState.cpp */; };
@@ -41,6 +42,8 @@
 		484BEC062089A3AD00B8CA79 /* TextureAtlasParser.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = TextureAtlasParser.hpp; sourceTree = "<group>"; };
 		486AE322208C4109008A6F70 /* SpriteAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SpriteAnimation.cpp; sourceTree = "<group>"; };
 		486AE323208C4109008A6F70 /* SpriteAnimation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SpriteAnimation.hpp; sourceTree = "<group>"; };
+		4861880C2092AB3E006C8722 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
+		4861880D2092AB3E006C8722 /* Timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Timer.hpp; sourceTree = "<group>"; };
 		4898130820803B5200D9B749 /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector3.cpp; sourceTree = "<group>"; };
 		4898130920803B5200D9B749 /* Vector3.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Vector3.hpp; sourceTree = "<group>"; };
 		4898130E20803DDA00D9B749 /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
@@ -245,13 +248,16 @@
 				484BEC0320898E7500B8CA79 /* XMLParser */,
 				4898130D20803CE800D9B749 /* Entity */,
 				4898130C20803CAB00D9B749 /* Game */,
-				48FAC7A4207EBB2E0081078D /* SatCollision.cpp */,
 				6D5A86B919AE5C710066C1FD /* main.cpp */,
+				48FAC7A4207EBB2E0081078D /* SatCollision.cpp */,
 				48FAC7A5207EBB2E0081078D /* SatCollision.h */,
 				4898130B20803C1200D9B749 /* ShaderProgram */,
 				4898130E20803DDA00D9B749 /* stb_image.h */,
+				4861880C2092AB3E006C8722 /* Timer.cpp */,
+				4861880D2092AB3E006C8722 /* Timer.hpp */,
 				4898130820803B5200D9B749 /* Vector3.cpp */,
 				4898130920803B5200D9B749 /* Vector3.hpp */,
+				484BEC0320898E7500B8CA79 /* XMLParser */,
 			);
 			name = Code;
 			sourceTree = "<group>";
@@ -330,6 +336,7 @@
 				4898130A20803B5200D9B749 /* Vector3.cpp in Sources */,
 				48D414BC2063122A00FC4896 /* Entity.cpp in Sources */,
 				486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */,
+				4861880E2092AB3E006C8722 /* Timer.cpp in Sources */,
 				48D414AF2062E30400FC4896 /* FlareMap.cpp in Sources */,
 				6DEF23C31B96CC2600BCE792 /* ShaderProgram.cpp in Sources */,
 				48D414B920630B9B00FC4896 /* SheetSprite.cpp in Sources */,

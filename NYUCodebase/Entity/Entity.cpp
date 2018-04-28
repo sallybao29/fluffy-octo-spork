@@ -14,7 +14,7 @@ Entity::Entity(float x, float y, const Shape& shape, EntityType type)
 Entity::Entity(float x, float y, SheetSprite *sprite, EntityType type)
 : position(x, y, 0.0f), scale(1.0f, 1.0f, 1.0f), sprite(sprite), entityType(type) {
     
-    this->shape = new Rectangle(sprite->width * sprite->size, sprite->height * sprite->size);
+    this->shape = new Rectangle(2 * sprite->width * sprite->size, 2 * sprite->height * sprite->size);
 }
 
 Entity::Entity() {}
@@ -28,7 +28,7 @@ Entity::~Entity() {
 
 void Entity::SetSprite(SheetSprite* newSprite) {
     sprite = newSprite;
-    shape->SetSize(sprite->width * sprite->size, sprite->height * sprite->size);
+    shape->SetSize(2 * sprite->width * sprite->size, 2 * sprite->height * sprite->size);
 }
 
 void Entity::UpdateMatrix() {
@@ -62,14 +62,6 @@ void Entity::Update(float elapsed) {
     collidedLeft = false;
     collidedRight = false;
     collidedBottom = false;
-    
-    position.x += velocity.x * elapsed;
-    position.y += velocity.y * elapsed;
-    
-    SheetSprite* frame = animations[currentAction]->GetCurrentFrame();
-    if (frame != sprite) {
-         SetSprite(frame);
-    }
 }
 
 bool Entity::CollidesWith(Entity& other) {
@@ -92,6 +84,49 @@ bool Entity::CollidesWith(Entity& other) {
     
     return collided;
 }
+
+bool Entity::CollidesWithX(float x, float width) {
+    collidedLeft = (position.x - shape->size.x / 2 < x + width / 2) &&
+                   (position.x - shape->size.x / 2 > x - width / 2);
+    collidedRight = (position.x + shape->size.x / 2 < x + width / 2) &&
+                    (position.x + shape->size.x / 2 > x - width / 2);
+    
+    // Adjust by the amount of penetration if there is collision
+    if (collidedRight) {
+        float penetration = fabs((position.x + shape->size.x / 2) - (x - width / 2));
+        position.x -= penetration - DELTA;
+        velocity.x = 0;
+    }
+    else if (collidedLeft) {
+        float penetration = fabs((x + width / 2) - (position.x - shape->size.x / 2));
+        position.x += penetration + DELTA;
+        velocity.x = 0;
+    }
+    
+    return collidedLeft || collidedRight;
+}
+
+bool Entity::CollidesWithY(float y, float height) {
+    collidedTop = (position.y + shape->size.y / 2 < y + height / 2) &&
+                  (position.y + shape->size.y / 2 > y - height / 2);
+    collidedBottom = (position.y + shape->size.y / 2 > y + height / 2) &&
+                     (position.y - shape->size.y / 2 < y + height / 2);
+    
+    // Adjust by the amount of penetration if there is collision
+    if (collidedTop) {
+        float penetration = fabs((position.y + shape->size.y / 2) - (y - height / 2));
+        position.y -= penetration - DELTA;
+        velocity.y = 0;
+    }
+    else if (collidedBottom) {
+        float penetration = fabs((y + height / 2) - (position.y - shape->size.y / 2));
+        position.y += penetration + DELTA;
+        velocity.y = 0;
+    }
+    
+    return collidedTop || collidedBottom;
+}
+
 
 void Entity::SetColor(float r, float g, float b, float a) {
     color[RED] = r;

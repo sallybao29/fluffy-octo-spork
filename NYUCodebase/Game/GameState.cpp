@@ -354,7 +354,7 @@ void GameState::Update(float elapsed) {
 void GameState::Render() {
     // Calculate bounds of scrolling
     float viewX = player->position.x;
-    float viewY = -(map->mapHeight * map->tileSize - projection.y);
+    float viewY = player->position.y;
     
     // Bound left scrolling to left end of the map
     if (viewX - projection.x <= 0) {
@@ -362,8 +362,12 @@ void GameState::Render() {
     }
     
     // Bound right scrolling to right end of the map
-    if (viewX + projection.x >= map->mapWidth * map->tileSize) {
+    if (viewX >= map->mapWidth * map->tileSize - projection.x) {
         viewX = map->mapWidth * map->tileSize - projection.x;
+    }
+    
+    if (viewY <= -(map->mapHeight * map->tileSize - projection.y)) {
+        viewY = -(map->mapHeight * map->tileSize - projection.y);
     }
     
     // Set view matrix to follow player
@@ -372,7 +376,7 @@ void GameState::Render() {
     shader->SetViewMatrix(viewMatrix);
     
     // Draw background
-    RenderBackground(viewX, viewY);
+    RenderBackground(viewX, -(map->mapHeight * map->tileSize - projection.y));
     
     // Draw map
     modelMatrix.Identity();

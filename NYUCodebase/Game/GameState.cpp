@@ -5,7 +5,7 @@
 
 #define ACCELERATION 15.0f
 #define MAX_VELOCITY_X 3.0f
-#define JUMP_VELOCITY 3.5f
+#define JUMP_VELOCITY 5.0f
 #define FRICTION 0.6f
 #define GRAVITY 4.9f
 
@@ -228,10 +228,10 @@ void GameState::ProcessInput() {
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 1.0f;
+            player->velocity.x = 0.5 * MAX_VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -1.0f;
+            player->velocity.x = -0.5 * MAX_VELOCITY_X;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -320,12 +320,33 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 void GameState::Update(float elapsed) {
     for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
-        
-        // Offset gravity so enemy can fly
-        if (entity->entityType == ENTITY_FLYING) {
-            entity->acceleration.y = GRAVITY;
-            Flyer* flyer = (Flyer*)entity;
-            flyer->Update(*player, elapsed);
+        switch (entity->entityType) {
+            case ENTITY_PLAYER:
+                // Enable wall bounce in ball form
+                if (!player->collidedBottom && player->currentAction == ACTION_DEFENDING) {
+                    if (player->collidedRight) {
+                        player->velocity.x = -JUMP_VELOCITY * 0.25;
+                        player->velocity.y = JUMP_VELOCITY * 0.60;
+                    }
+                    else if (player->collidedLeft) {
+                        player->velocity.x = JUMP_VELOCITY * 0.25;
+                        player->velocity.y = JUMP_VELOCITY * 0.60;
+                    }
+                }
+                break;
+            case ENTITY_FLYING:
+                // Offset gravity so enemy can fly
+                if (entity->entityType == ENTITY_FLYING) {
+                    entity->acceleration.y = GRAVITY;
+                    Flyer* flyer = (Flyer*)entity;
+                    flyer->Update(*player, elapsed);
+                }
+                break;
+            case ENTITY_FLOATING:
+                entity->acceleration.y = GRAVITY;
+                break;
+            default:
+                break;
         }
         
         UpdatePhysics(*entity, elapsed);
@@ -337,7 +358,7 @@ void GameState::Update(float elapsed) {
         if (entity == player) continue;
         bool collided = player->CollidesWith(*entity);
         if (collided) {
-            Reset();
+            mode = STATE_GAME_OVER;
         }
     }
     

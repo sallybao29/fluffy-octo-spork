@@ -4,8 +4,8 @@
 #include "Flyer.hpp"
 
 #define ACCELERATION 15.0f
-#define MAX_VELOCITY_X 3.0f
-#define JUMP_VELOCITY 5.0f
+#define VELOCITY_X 0.5f
+#define JUMP_VELOCITY 4.5f
 #define FRICTION 0.6f
 #define GRAVITY 4.9f
 
@@ -213,10 +213,10 @@ void GameState::ProcessInput() {
     // Defense form cannot move
     if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 0.5f;
+            player->velocity.x = VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -0.5f;
+            player->velocity.x = -VELOCITY_X;
         }
         else {
             player->velocity.x = 0.0f;
@@ -228,10 +228,10 @@ void GameState::ProcessInput() {
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 0.5 * MAX_VELOCITY_X;
+            player->velocity.x = 2.5f * VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -0.5 * MAX_VELOCITY_X;
+            player->velocity.x = -2.5f * VELOCITY_X;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -242,6 +242,7 @@ void GameState::ProcessInput() {
     // Defending
     if (keys[SDL_SCANCODE_D]) {
         if (player->currentAction != ACTION_DEFENDING)
+            player->previousAction = player->currentAction;
         player->currentAction = ACTION_DEFENDING;
     }
     else if (player->currentAction == ACTION_DEFENDING) {
@@ -304,7 +305,6 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             // TODO
             break;
         case ENTITY_FLYING:
-            // For now, it just flies in place
             entity.animations[entity.currentAction]->NextFrame(0.10 * frameSpeed);
             break;
         default:
@@ -325,13 +325,21 @@ void GameState::Update(float elapsed) {
                 // Enable wall bounce in ball form
                 if (!player->collidedBottom && player->currentAction == ACTION_DEFENDING) {
                     if (player->collidedRight) {
-                        player->velocity.x = -JUMP_VELOCITY * 0.25;
-                        player->velocity.y = JUMP_VELOCITY * 0.60;
+                        player->velocity.x = -VELOCITY_X * 2.0f;
+                        player->velocity.y = JUMP_VELOCITY * 0.75f;
                     }
                     else if (player->collidedLeft) {
-                        player->velocity.x = JUMP_VELOCITY * 0.25;
-                        player->velocity.y = JUMP_VELOCITY * 0.60;
+                        player->velocity.x = VELOCITY_X * 2.0f;
+                        player->velocity.y = JUMP_VELOCITY * 0.75f;
                     }
+                }
+                // Ground bounce in ball form
+                // Flawed: Only bounces if a jump was initiated
+                // If player transitions from defense form to walking mid-jump, ground bounce will fail
+                else if (player->collidedBottom &&
+                         player->currentAction == ACTION_DEFENDING &&
+                         player->previousAction == ACTION_JUMPING) {
+                    player->velocity.y = JUMP_VELOCITY * 1.2f;
                 }
                 break;
             case ENTITY_FLYING:
@@ -353,10 +361,12 @@ void GameState::Update(float elapsed) {
         UpdateAnimation(*entity, elapsed);
     }
     
+    // Check collision of player against enemy
     for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
         if (entity == player) continue;
         bool collided = player->CollidesWith(*entity);
+        // If player contacts enemy, game over
         if (collided) {
             mode = STATE_GAME_OVER;
         }

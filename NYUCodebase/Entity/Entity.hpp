@@ -161,6 +161,9 @@ public:
     /// The entity's current action
     EntityAction currentAction;
     
+    /// The entity's previous action
+    EntityAction previousAction = ACTION_NONE;
+    
     /// The position of the entity in world coordinates
     Vector3 position;
     

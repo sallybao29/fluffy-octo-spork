@@ -2,6 +2,7 @@
 #include <sstream>
 #include "GameState.hpp"
 #include "Flyer.hpp"
+#include "Walker.hpp"
 
 #define ACCELERATION 15.0f
 #define VELOCITY_X 0.5f
@@ -90,6 +91,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (strcmp(type.data(), "enemyWalking") == 0) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
@@ -353,6 +355,20 @@ void GameState::Update(float elapsed) {
             case ENTITY_FLOATING:
                 entity->acceleration.y = GRAVITY;
                 break;
+            case ENTITY_WALKING:
+                if (entity -> entityType == ENTITY_WALKING) {
+                    
+                    int boty = map->worldToTileCoordY(entity -> position.y - (entity -> shape->size.y /2) + 0.1);
+                    int leftx = map -> worldToTileCoordX(entity-> position.x - (entity -> shape -> size.x / 2) + 0.1);
+                    int rightx = map -> worldToTileCoordX(entity-> position.x + (entity -> shape -> size.x /2) - 0.1 ) ;
+                    if (map -> mapData [boty] [rightx] == 0) {
+                        entity -> velocity.x = -0.5;
+                    }
+                    if (map -> mapData [boty] [leftx] == 0 ) {
+                        entity -> velocity.x = 0.5;
+                    }
+                    
+                }
             default:
                 break;
         }

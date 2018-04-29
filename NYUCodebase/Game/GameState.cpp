@@ -1,10 +1,11 @@
 #include <unordered_set>
 #include <sstream>
 #include "GameState.hpp"
+#include "Flyer.hpp"
 
-#define ACCELERATION 0.7f
-#define MAX_VELOCITY_X 3.0f
-#define JUMP_VELOCITY 3.5f
+#define ACCELERATION 15.0f
+#define VELOCITY_X 0.5f
+#define JUMP_VELOCITY 4.5f
 #define FRICTION 0.6f
 #define GRAVITY 4.9f
 
@@ -16,7 +17,9 @@
 std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256,
+    // Green world
+    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
@@ -35,27 +38,18 @@ GameState::~GameState() {
 
 void GameState::Initialize() {
     LoadLevel();
-
-    // Create entities
-    for (int i = 0; i < map->entities.size(); i++) {
-        PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
-    }
-    // Ensure that the player has been created
-    if (player == nullptr) {
-        assert(false);
-    }
 }
 
 void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityX = x * map->tileSize + map->tileSize / 2;
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
-    // Create entity at position (entityX, entityY)
-    Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-    entities.push_back(entity);
-    
     // Player entity
     if (strcmp(type.data(), "playerBlue") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         player = entity;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
@@ -74,13 +68,19 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     }
     // Flying enemy
     else if (strcmp(type.data(), "enemyFlying") == 0) {
-        entity->entityType = ENTITY_FLYING;
-        entity->currentAction = ACTION_FLYING;
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Flyer(entityX, entityY, 1.5f);
+        entities.push_back(entity);
+
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
     // Floating enemy
     else if (strcmp(type.data(), "enemyFloating") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         entity->entityType = ENTITY_FLOATING;
         entity->currentAction = ACTION_DEFENDING;
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
@@ -88,6 +88,10 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     }
     // Walking enemy
     else if (strcmp(type.data(), "enemyWalking") == 0) {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        
         entity->entityType = ENTITY_WALKING;
         entity->currentAction = ACTION_WALKING;
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
@@ -107,16 +111,25 @@ void GameState::LoadLevel() {
     map = new FlareMap(0.3f);
     map->Load(stream.str());
     map->SetSpriteSheet(textures[TILES], 22, 12);
+    
+    // Create entities
+    for (size_t i = 0; i < entities.size(); i++) {
+        delete entities[i];
+    }
+    entities.clear();
+    
+    for (int i = 0; i < map->entities.size(); i++) {
+        PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
+    }
+    // Ensure that the player has been created
+    if (player == nullptr) {
+        assert(false);
+    }
 }
 
 void GameState::Reset() {
-    if (level == 1) {
-        // reset code here, don't need to reload the map
-    }
-    else {
-        level = 1;
-        LoadLevel();
-    }
+    level = 1;
+    LoadLevel();
 }
 
 /*----------------------------------- Collision Resolution ------------------------------------------*/
@@ -175,8 +188,8 @@ void GameState::CollideWithMap(Entity& entity, int direction) {
 
 /*------------------------------------ Processing Input -------------------------------------------*/
 void GameState::ProcessInput() {
-    player->acceleration.x = 0.0f;
     player->acceleration.y = 0.0f;
+    player->acceleration.x = 0.0f;
     
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -200,22 +213,25 @@ void GameState::ProcessInput() {
     // Defense form cannot move
     if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 0.5f;
+            player->velocity.x = VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -0.5f;
+            player->velocity.x = -VELOCITY_X;
         }
         else {
             player->velocity.x = 0.0f;
+        }
+        if (fabs(player->velocity.x) > 0 && keys[SDL_SCANCODE_A]) {
+            player->acceleration.x = player->velocity.x > 0 ? ACCELERATION : -ACCELERATION;
         }
     }
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 0.7f;
+            player->velocity.x = 2.5f * VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -0.7f;
+            player->velocity.x = -2.5f * VELOCITY_X;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -226,6 +242,7 @@ void GameState::ProcessInput() {
     // Defending
     if (keys[SDL_SCANCODE_D]) {
         if (player->currentAction != ACTION_DEFENDING)
+            player->previousAction = player->currentAction;
         player->currentAction = ACTION_DEFENDING;
     }
     else if (player->currentAction == ACTION_DEFENDING) {
@@ -282,22 +299,13 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             player->animations[player->currentAction]->NextFrame(frameSpeed);
             break;
         case ENTITY_WALKING:
-            // TODO
+            entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
             break;
         case ENTITY_FLOATING:
-            // Activates when player enters range
-            if (fabs(player->position.x - entity.position.x) < 0.5f) {
-                entity.currentAction = ACTION_ATTACKING;
-            }
-            // Otherwise idle
-            else {
-                entity.currentAction = ACTION_DEFENDING;
-            }
+            // TODO
             break;
         case ENTITY_FLYING:
-            // For now, it just flies in place
-            entity.animations[entity.currentAction]->NextFrame(0.15 * frameSpeed);
-            // TODO
+            entity.animations[entity.currentAction]->NextFrame(0.10 * frameSpeed);
             break;
         default:
             break;
@@ -310,10 +318,58 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 }
 
 void GameState::Update(float elapsed) {
-    for (int i = 0; i < entities.size(); i++) {
+    for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
+        switch (entity->entityType) {
+            case ENTITY_PLAYER:
+                // Enable wall bounce in ball form
+                if (!player->collidedBottom && player->currentAction == ACTION_DEFENDING) {
+                    if (player->collidedRight) {
+                        player->velocity.x = -VELOCITY_X * 2.0f;
+                        player->velocity.y = JUMP_VELOCITY * 0.75f;
+                    }
+                    else if (player->collidedLeft) {
+                        player->velocity.x = VELOCITY_X * 2.0f;
+                        player->velocity.y = JUMP_VELOCITY * 0.75f;
+                    }
+                }
+                // Ground bounce in ball form
+                // Flawed: Only bounces if a jump was initiated
+                // If player transitions from defense form to walking mid-jump, ground bounce will fail
+                else if (player->collidedBottom &&
+                         player->currentAction == ACTION_DEFENDING &&
+                         player->previousAction == ACTION_JUMPING) {
+                    player->velocity.y = JUMP_VELOCITY * 1.2f;
+                }
+                break;
+            case ENTITY_FLYING:
+                // Offset gravity so enemy can fly
+                if (entity->entityType == ENTITY_FLYING) {
+                    entity->acceleration.y = GRAVITY;
+                    Flyer* flyer = (Flyer*)entity;
+                    flyer->Update(*player, elapsed);
+                }
+                break;
+            case ENTITY_FLOATING:
+                entity->acceleration.y = GRAVITY;
+                break;
+            default:
+                break;
+        }
+        
         UpdatePhysics(*entity, elapsed);
         UpdateAnimation(*entity, elapsed);
+    }
+    
+    // Check collision of player against enemy
+    for (size_t i = 0; i < entities.size(); i++) {
+        Entity* entity = entities[i];
+        if (entity == player) continue;
+        bool collided = player->CollidesWith(*entity);
+        // If player contacts enemy, game over
+        if (collided) {
+            mode = STATE_GAME_OVER;
+        }
     }
     
     // Keep player in bounds of map
@@ -329,7 +385,7 @@ void GameState::Update(float elapsed) {
 void GameState::Render() {
     // Calculate bounds of scrolling
     float viewX = player->position.x;
-    float viewY = -(map->mapHeight * map->tileSize - projection.y);
+    float viewY = player->position.y;
     
     // Bound left scrolling to left end of the map
     if (viewX - projection.x <= 0) {
@@ -337,8 +393,12 @@ void GameState::Render() {
     }
     
     // Bound right scrolling to right end of the map
-    if (viewX + projection.x >= map->mapWidth * map->tileSize) {
+    if (viewX >= map->mapWidth * map->tileSize - projection.x) {
         viewX = map->mapWidth * map->tileSize - projection.x;
+    }
+    
+    if (viewY <= -(map->mapHeight * map->tileSize - projection.y)) {
+        viewY = -(map->mapHeight * map->tileSize - projection.y);
     }
     
     // Set view matrix to follow player
@@ -347,7 +407,7 @@ void GameState::Render() {
     shader->SetViewMatrix(viewMatrix);
     
     // Draw background
-    RenderBackground(viewX, viewY);
+    RenderBackground(viewX, -(map->mapHeight * map->tileSize - projection.y));
     
     // Draw map
     modelMatrix.Identity();

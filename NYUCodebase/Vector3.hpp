@@ -44,4 +44,12 @@ public:
  */
 Vector3 operator * (const Matrix& matrix, const Vector3& vector);
 
+/*!
+ * @discussion Calculates the distance between two position vectors
+ * @param v1 First position
+ * @param v2 Second position
+ * @return The distance between the two positions
+ */
+float distance(const Vector3& v1, const Vector3& v2);
+
 #endif

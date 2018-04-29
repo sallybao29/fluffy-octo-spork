@@ -2,7 +2,6 @@
 #include <sstream>
 #include "GameState.hpp"
 #include "Flyer.hpp"
-#include "Walker.hpp"
 
 #define ACCELERATION 15.0f
 #define VELOCITY_X 0.5f
@@ -91,7 +90,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (strcmp(type.data(), "enemyWalking") == 0) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        
+        entity->velocity.x = VELOCITY_X;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
@@ -301,7 +300,7 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             player->animations[player->currentAction]->NextFrame(frameSpeed);
             break;
         case ENTITY_WALKING:
-            entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
+            entity.animations[entity.currentAction]->NextFrame(fabs(entity.velocity.x) * frameSpeed);
             break;
         case ENTITY_FLOATING:
             // TODO
@@ -316,6 +315,29 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
     SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
     if (frame != entity.sprite) {
         entity.SetSprite(frame);
+    }
+}
+
+void GameState::CheckForTurn(Entity& entity) {
+    int boty = map->worldToTileCoordY(entity.position.y - entity.shape->size.y / 2 - map->tileSize / 4);
+    
+    if (entity.velocity.x < 0) {
+        int leftx = map -> worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 4);
+        if (solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end()) {
+            entity.velocity.x = VELOCITY_X * 0.75;
+        }
+        else {
+            entity.velocity.x = -VELOCITY_X * 0.75;
+        }
+    }
+    else {
+        int rightx = map -> worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 4);
+        if (solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end()) {
+            entity.velocity.x = -VELOCITY_X * 0.75;
+        }
+        else {
+            entity.velocity.x = VELOCITY_X * 0.75;
+        }
     }
 }
 
@@ -356,19 +378,8 @@ void GameState::Update(float elapsed) {
                 entity->acceleration.y = GRAVITY;
                 break;
             case ENTITY_WALKING:
-                if (entity -> entityType == ENTITY_WALKING) {
-                    
-                    int boty = map->worldToTileCoordY(entity -> position.y - (entity -> shape->size.y /2) + 0.1);
-                    int leftx = map -> worldToTileCoordX(entity-> position.x - (entity -> shape -> size.x / 2) + 0.1);
-                    int rightx = map -> worldToTileCoordX(entity-> position.x + (entity -> shape -> size.x /2) - 0.1 ) ;
-                    if (map -> mapData [boty] [rightx] == 0) {
-                        entity -> velocity.x = -0.5;
-                    }
-                    if (map -> mapData [boty] [leftx] == 0 ) {
-                        entity -> velocity.x = 0.5;
-                    }
-                    
-                }
+                CheckForTurn(*entity);
+                break;
             default:
                 break;
         }

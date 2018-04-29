@@ -105,6 +105,8 @@ private:
      */
     void RenderBackground(float viewX, float viewY);
     
+    void CheckForTurn(Entity& entity);
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;

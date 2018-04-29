@@ -90,7 +90,7 @@ public:
      * sprite will be rendered as plain polygons based on their shape property
      * @param program The shader program to use when rendering
      */
-    void Render(ShaderProgram& program);
+    virtual void Render(ShaderProgram& program);
     
     /*!
      * @discussion Assigns the entity a new sprite and adjusts its size accordingly

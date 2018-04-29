@@ -70,6 +70,8 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (strcmp(type.data(), "enemyFlying") == 0) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Flyer(entityX, entityY, 1.5f);
+        // Offset gravity so it can fly
+        entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
@@ -79,12 +81,14 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (strcmp(type.data(), "enemyFloating") == 0) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        // Offset gravity so it can fly
+        entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_FLOATING;
         entity->currentAction = ACTION_DEFENDING;
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
-        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
+        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating", 3.5, LOOP_ONCE, 2);
     }
     // Walking enemy
     else if (strcmp(type.data(), "enemyWalking") == 0) {
@@ -302,6 +306,17 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
             break;
         case ENTITY_FLOATING:
+            if (entity.currentAction == ACTION_DEFENDING) {
+                
+            }
+            if (distance(player->position, entity.position) < 2.0f) {
+                entity.animations[ACTION_ATTACKING]->Reset();
+                entity.currentAction = ACTION_ATTACKING;
+            }
+            else {
+                entity.currentAction = ACTION_DEFENDING;
+            }
+            entity.animations[entity.currentAction]->NextFrame(frameSpeed);
             // TODO
             break;
         case ENTITY_FLYING:
@@ -343,15 +358,10 @@ void GameState::Update(float elapsed) {
                 }
                 break;
             case ENTITY_FLYING:
-                // Offset gravity so enemy can fly
                 if (entity->entityType == ENTITY_FLYING) {
-                    entity->acceleration.y = GRAVITY;
                     Flyer* flyer = (Flyer*)entity;
                     flyer->Update(*player, elapsed);
                 }
-                break;
-            case ENTITY_FLOATING:
-                entity->acceleration.y = GRAVITY;
                 break;
             default:
                 break;

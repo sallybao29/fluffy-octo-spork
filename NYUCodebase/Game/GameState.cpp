@@ -323,20 +323,22 @@ void GameState::CheckForTurn(Entity& entity) {
     
     if (entity.velocity.x < 0) {
         int leftx = map -> worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 4);
-        if (solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end()) {
+        
+        if (map -> mapData [boty][leftx] == 0 || solidTiles.find (map ->mapData [boty][leftx] ) == solidTiles.end () || solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end() || entity.collidedLeft) {
             entity.velocity.x = VELOCITY_X * 0.75;
         }
         else {
             entity.velocity.x = -VELOCITY_X * 0.75;
         }
+    
     }
     else {
         int rightx = map -> worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 4);
-        if (solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end()) {
-            entity.velocity.x = -VELOCITY_X * 0.75;
-        }
-        else {
-            entity.velocity.x = VELOCITY_X * 0.75;
+         if (map -> mapData [boty] [rightx] == 0 || solidTiles.find (map ->mapData [boty][rightx] ) == solidTiles.end () ||solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end() || entity.collidedRight) {
+             entity.velocity.x = -VELOCITY_X * 0.75;
+         }
+         else {
+             entity.velocity.x = VELOCITY_X * 0.75;
         }
     }
 }

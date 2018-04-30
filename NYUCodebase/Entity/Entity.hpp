@@ -119,7 +119,7 @@ public:
      * @param other The entity being collided against
      * @return Whether the collision occurred
      */
-    bool CollidesWith(Entity& other);
+    bool CollidesWith(Entity& other, std::pair<float, float>& penetration);
     
     /*!
      * @discussion Adds an animation for the given entity action

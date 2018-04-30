@@ -46,7 +46,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
     // Player entity
-    if (strcmp(type.data(), "playerBlue") == 0) {
+    if (type == "playerBlue") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entities.push_back(entity);
@@ -68,7 +68,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         player->animations[ACTION_JUMPING]->SetSpeed(30);
     }
     // Flying enemy
-    else if (strcmp(type.data(), "enemyFlying") == 0) {
+    else if (type == "enemyFlying") {
         // Create entity at position (entityX, entityY)
         Flyer* entity = new Flyer(entityX, entityY, 1.5f);
         // Offset gravity so it can fly
@@ -79,10 +79,10 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
     // Floating enemy
-    else if (strcmp(type.data(), "enemyFloating") == 0) {
+    else if (type == "enemyFloating") {
         // Create entity at position (entityX, entityY)
         Floater* entity = new Floater(entityX, entityY, 1.5f, 0.3f, map->tileSize * 5);
-        // Offset gravity so it can fly
+        // Offset gravity so it can float
         entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
 
@@ -90,7 +90,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
     }
     // Walking enemy
-    else if (strcmp(type.data(), "enemyWalking") == 0) {
+    else if (type == "enemyWalking") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entities.push_back(entity);
@@ -209,6 +209,9 @@ void GameState::ProcessInput() {
                     player->animations[ACTION_JUMPING]->Reset();
                     timer.start();
                 }
+            }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                Reset();
             }
         }
     }
@@ -345,6 +348,7 @@ void GameState::Update(float elapsed) {
                 break;
             case ENTITY_FLYING:
                 ((Flyer*)entity)->Update(*player, elapsed);
+                
                 break;
             case ENTITY_FLOATING:
                 ((Floater*)entity)->Update(*player, elapsed);
@@ -365,10 +369,23 @@ void GameState::Update(float elapsed) {
     for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
         if (entity == player) continue;
-        bool collided = player->CollidesWith(*entity);
-        // If player contacts enemy, game over
-        if (collided && player->currentAction != ACTION_DEFENDING) {
-            mode = STATE_GAME_OVER;
+        std::pair<float, float> penetration;
+        bool collided = player->CollidesWith(*entity, penetration);
+        if (collided) {
+            // Adjust player by collision amount
+            if (player->currentAction == ACTION_DEFENDING) {
+                player->position.x += penetration.first;
+                player->position.y += penetration.second;
+                
+                player->velocity.y = 0.0f;
+            }
+            else {
+                // If player loses all lives, game over
+            }
+        }
+        if (entity->entityType == ENTITY_FLOATING) {
+            // Check collision with bullets
+            ((Floater*)entity)->CollideWithBullets(*player);
         }
     }
     

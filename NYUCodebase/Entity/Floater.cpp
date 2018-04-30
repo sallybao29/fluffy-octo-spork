@@ -1,6 +1,7 @@
 #include "Floater.hpp"
 #include "GameUtilities.hpp"
 #include "ShaderProgram.h"
+#include "SatCollision.h"
 
 Bullet::Bullet(const SheetSprite& sprite) {
     this->sprite = new SheetSprite(sprite);
@@ -28,16 +29,28 @@ void Bullet::Render(ShaderProgram& program) {
     sprite->Render(program);
 }
 
-void Bullet::CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles) {
-    if (!active) return;
+bool Bullet::CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles) {
+    if (!active) return false;
     
     int x, y;
     map.worldToTileCoordinates(position.x, position.y, x, y);
     if (x < 0 || y < 0 ||
         map.mapData[y][x] == 0 ||
-        solidTiles.find(map.mapData[y][x] - 1) == solidTiles.end()) return;
+        solidTiles.find(map.mapData[y][x] - 1) == solidTiles.end()) return false;
     
     active = false;
+    return true;
+}
+
+bool Bullet::CollidesWith(Entity& entity) {
+    if (!active) return false;
+    bool collided = position.x > entity.position.x - entity.shape->size.x / 2 &&
+                    position.x < entity.position.x + entity.shape->size.x / 2 &&
+                    position.y < entity.position.y + entity.shape->size.y / 2 &&
+                    position.y > entity.position.y - entity.shape->size.y / 2;
+    
+    if (collided) active = false;
+    return collided;
 }
 
 /*---------------------------------------- Floater ------------------------------------------*/
@@ -122,6 +135,21 @@ void Floater::Render(ShaderProgram& program) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
             bullets[i].Render(program);
+        }
+    }
+}
+
+void Floater::CollideWithBullets(Entity& target) {
+    for (Bullet& bullet : bullets) {
+        bool collided = bullet.CollidesWith(target);
+        if (collided) {
+            // Play sound
+            if (target.currentAction != ACTION_DEFENDING) {
+                // TODO: Target loses hp
+                // Invulnerability mode
+                // Maybe play a hurt sound
+                return;
+            }
         }
     }
 }

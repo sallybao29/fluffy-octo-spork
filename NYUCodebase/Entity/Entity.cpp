@@ -73,24 +73,14 @@ void Entity::Update(float elapsed) {
     collidedBottom = false;
 }
 
-bool Entity::CollidesWith(Entity& other) {
-    std::pair<float, float> penetration;
-    
+bool Entity::CollidesWith(Entity& other, std::pair<float, float>& penetration) {
     UpdateMatrix();
     other.UpdateMatrix();
     
     std::vector<std::pair<float, float>> e1Points = ToWorldSpace(modelMatrix, shape->points());
     std::vector<std::pair<float, float>> e2Points = ToWorldSpace(other.modelMatrix, other.shape->points());
     bool collided = CheckSATCollision(e1Points, e2Points, penetration);
-    
-    if (collided) {
-        position.x += penetration.first * 0.5f;
-        position.y += penetration.second * 0.5f;
-        
-        other.position.x -= penetration.first * 0.5f;
-        other.position.y -= penetration.second * 0.5f;
-    }
-    
+
     return collided;
 }
 

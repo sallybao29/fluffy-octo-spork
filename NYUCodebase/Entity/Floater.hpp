@@ -18,8 +18,21 @@ public:
     
     void Render(ShaderProgram& program);
     void Update(float elapsed);
+    
+    /*!
+     * @discussion Checks if the bullet hits an entity and deactivates the bullet upon collision
+     * @param entity The entity to collide with
+     * @return Whether the collision occurred
+     */
     bool CollidesWith(Entity& entity);
-    void CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles);
+    
+    /*!
+     * @discussion Checks if the bullet hits a solid tile in the map and deactivates the bullet upon collision
+     * @param map The map
+     * @param solidTiles A reference to a set of tile values that are considered solid
+     * @return Whether the collision occurred
+     */
+    bool CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles);
     
     SheetSprite* sprite;
     Shape* shape;
@@ -31,9 +44,29 @@ public:
 
 class Floater : public Entity {
 public:
+    /*!
+     * @discussion Initializes a floater at the given position with the specified range, shooting speed,
+     * and bullet size
+     * @param x The x coordinate of the position
+     * @param y The y coordinate of the position
+     * @param range The floater's detection range
+     * @param shootSpeed The number of times the floater shoots per second
+     * @param bulletSize The size of the bullet
+     */
     Floater(float x, float y, float range, float shootSpeed, float bulletSize = 0.1f);
     
+    /*!
+     * @discussion Shoots a single bullet from the given position
+     * @param x The x coordinate of the position
+     * @param y The y coordinate of the position
+     * @param velX The x velocity of the bullet
+     * @param velY The y velocity of the bullet
+     */
     void ShootBullet(float x, float y, float velX, float velY);
+    
+    /*!
+     * @discussion Shoots four bullets, each from a corner of the floaters
+     */
     void Shoot();
     
     /*!
@@ -44,6 +77,12 @@ public:
     void Update(Entity& target, float elapsed);
     
     void Render(ShaderProgram& program) override;
+    
+    /*!
+     * @discussion Checks if any bullets collide with the target
+     * @param target The entity to check collision against
+     */
+    void CollideWithBullets(Entity& target);
     
     std::vector<Bullet> bullets;
     int bulletIndex;

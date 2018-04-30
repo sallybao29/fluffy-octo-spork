@@ -70,7 +70,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Flying enemy
     else if (strcmp(type.data(), "enemyFlying") == 0) {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Flyer(entityX, entityY, 1.5f);
+        Flyer* entity = new Flyer(entityX, entityY, 1.5f);
         // Offset gravity so it can fly
         entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
@@ -81,13 +81,13 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Floating enemy
     else if (strcmp(type.data(), "enemyFloating") == 0) {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Floater(entityX, entityY, 1.0f, 3.0f);
+        Floater* entity = new Floater(entityX, entityY, 1.5f, 0.3f, map->tileSize * 5);
         // Offset gravity so it can fly
         entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
-        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE, 2);
+        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
     }
     // Walking enemy
     else if (strcmp(type.data(), "enemyWalking") == 0) {
@@ -348,6 +348,10 @@ void GameState::Update(float elapsed) {
                 break;
             case ENTITY_FLOATING:
                 ((Floater*)entity)->Update(*player, elapsed);
+                // Remove bullets that hit solid objects on the map
+                for (Bullet& bullet : ((Floater*)entity)->bullets) {
+                    bullet.CollideWithMap(*map, solidTiles);
+                }
                 break;
             default:
                 break;
@@ -363,7 +367,7 @@ void GameState::Update(float elapsed) {
         if (entity == player) continue;
         bool collided = player->CollidesWith(*entity);
         // If player contacts enemy, game over
-        if (collided) {
+        if (collided && player->currentAction != ACTION_DEFENDING) {
             mode = STATE_GAME_OVER;
         }
     }

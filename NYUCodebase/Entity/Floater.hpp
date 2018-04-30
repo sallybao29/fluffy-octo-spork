@@ -2,35 +2,36 @@
 #define Floater_hpp
 
 #include <stdio.h>
+#include <unordered_set>
 #include "Entity.hpp"
 #include "Matrix.h"
 
 #define MAX_BULLETS 20
-#define BULLET_SPEED 1.0f
+#define BULLET_SPEED 0.5f
 
 class Floater;
 
 class Bullet {
 public:
-    Bullet(const SheetSprite& sprite, float size = 0.1f);
+    Bullet(const SheetSprite& sprite);
     ~Bullet();
     
-    void Render(ShaderProgram& program, Matrix& matrix);
+    void Render(ShaderProgram& program);
     void Update(float elapsed);
     bool CollidesWith(Entity& entity);
+    void CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles);
     
     SheetSprite* sprite;
     Shape* shape;
     Vector3 position;
     Vector3 velocity;
-    Floater* parent;
     bool active;
 };
 
 
 class Floater : public Entity {
 public:
-    Floater(float x, float y, float range, float shootSpeed);
+    Floater(float x, float y, float range, float shootSpeed, float bulletSize = 0.1f);
     
     void ShootBullet(float x, float y, float velX, float velY);
     void Shoot();
@@ -53,8 +54,6 @@ public:
     float bulletSize;
     
     AIState state;
-    
-    Matrix matrix;
 };
 
 #endif

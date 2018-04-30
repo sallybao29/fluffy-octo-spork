@@ -2,7 +2,7 @@
 #include "GameUtilities.hpp"
 #include "ShaderProgram.h"
 
-Bullet::Bullet(const SheetSprite& sprite, float size) {
+Bullet::Bullet(const SheetSprite& sprite) {
     this->sprite = new SheetSprite(sprite);
     shape = new Rectangle(2 * this->sprite->width * this->sprite->size,
                           2 * this->sprite->height * this->sprite->size);
@@ -15,25 +15,38 @@ Bullet::~Bullet() {
 }
 
 void Bullet::Update(float elapsed) {
-    position.x += velocity.x;
-    position.y += velocity.y;
+    position.x += velocity.x * elapsed;
+    position.y += velocity.y * elapsed;
 }
 
-void Bullet::Render(ShaderProgram& program, Matrix& matrix) {
-    Matrix modelMatrix = matrix;
+void Bullet::Render(ShaderProgram& program) {
+    Matrix modelMatrix;
+    modelMatrix.Identity();
     modelMatrix.Translate(position.x, position.y, position.z);
     program.SetModelMatrix(modelMatrix);
     
     sprite->Render(program);
 }
 
+void Bullet::CollideWithMap(const FlareMap& map, const std::unordered_set<unsigned int>& solidTiles) {
+    if (!active) return;
+    
+    int x, y;
+    map.worldToTileCoordinates(position.x, position.y, x, y);
+    if (x < 0 || y < 0 ||
+        map.mapData[y][x] == 0 ||
+        solidTiles.find(map.mapData[y][x] - 1) == solidTiles.end()) return;
+    
+    active = false;
+}
+
 /*---------------------------------------- Floater ------------------------------------------*/
 
-Floater::Floater(float x, float y, float range, float shootSpeed)
-: Entity(x, y, Rectangle(0.0f, 0.0f), ENTITY_FLOATING), range(range), shootSpeed(shootSpeed) {
+Floater::Floater(float x, float y, float range, float shootSpeed, float bulletSize)
+: Entity(x, y, Rectangle(0.0f, 0.0f), ENTITY_FLOATING), range(range),
+    shootSpeed(shootSpeed), bulletSize(bulletSize) {
     bulletIndex = 0;
-    secondsSinceShot = 0.0f;
-    bulletSize = 0.1f;
+    secondsSinceShot = 1 / shootSpeed;
     state = STATE_IDLE;
     currentAction = ACTION_DEFENDING;
     bullets.reserve(MAX_BULLETS);
@@ -41,15 +54,13 @@ Floater::Floater(float x, float y, float range, float shootSpeed)
     for (int i = 0 ; i < MAX_BULLETS; i++) {
         float x, y, width, height;
         textureAtlas.GetSpriteData("redGem", x, y, width, height);
-        SheetSprite sprite(textures[OBJECTS], x / 1024, y / 1024, width / 1024, height / 1024, 3);
-        bullets.emplace_back(sprite, bulletSize * 10);
-        bullets.back().parent = this;
+        SheetSprite sprite(textures[OBJECTS], x / 1024, y / 1024, width / 1024, height / 1024, bulletSize);
+        bullets.emplace_back(sprite);
     }
 }
 
 void Floater::ShootBullet(float x, float y, float velX, float velY) {
     Bullet& bullet = bullets[bulletIndex];
-    bullet.shape->SetSize(bulletSize, bulletSize);
     bullet.position.x = x;
     bullet.position.y = y;
     bullet.velocity.x = velX;
@@ -65,8 +76,8 @@ void Floater::ShootBullet(float x, float y, float velX, float velY) {
 void Floater::Shoot() {
     float leftX = position.x - shape->size.x / 2;
     float rightX = position.x + shape->size.x / 2;
-    float topY = position.y - shape->size.y / 2;
-    float botY = position.y + shape->size.y / 2;
+    float topY = position.y + shape->size.y / 2;
+    float botY = position.y - shape->size.y / 2;
     
     ShootBullet(leftX, topY, -BULLET_SPEED, BULLET_SPEED);
     ShootBullet(rightX, topY, BULLET_SPEED, BULLET_SPEED);
@@ -83,15 +94,15 @@ void Floater::Update(Entity& target, float elapsed) {
             }
             break;
         case STATE_ATTACKING:
-            if (secondsSinceShot >= shootSpeed) {
+            if (secondsSinceShot >= 1 / shootSpeed) {
                 Shoot();
-                secondsSinceShot -= shootSpeed;
+                secondsSinceShot -= 1 / shootSpeed;
             }
             else {
                 secondsSinceShot += elapsed;
             }
             if (distance(target.position, position) > range) {
-                secondsSinceShot = 0;
+                secondsSinceShot = 1 / shootSpeed;
                 state = STATE_IDLE;
                 currentAction = ACTION_DEFENDING;
             }
@@ -110,7 +121,7 @@ void Floater::Render(ShaderProgram& program) {
     
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
-            bullets[i].Render(program, matrix);
+            bullets[i].Render(program);
         }
     }
 }

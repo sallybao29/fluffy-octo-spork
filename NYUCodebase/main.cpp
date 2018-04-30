@@ -17,7 +17,7 @@ SDL_Event event;
 bool done = false;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 
-GameMode mode = STATE_GAME_LEVEL;
+GameMode mode = STATE_TITLE_SCREEN;
 GameState state(&program);
 
 std::map<std::string, GLuint> textures;
@@ -40,7 +40,8 @@ void ProcessTitleScreenInput() {
 }
 
 void RenderTitleScreen() {
-    
+    DrawWords(program, fonts, "FLUFFY OCTO", 0.4f, 0.0f, -1*(-0.5f * 0.4) - (11*0.4/2), 0.5f );
+    DrawWords(program, fonts, "Press Space to Play", 0.2f, 0.0f, -1*(-0.5f * 0.2) - (19*0.2/2), -0.5f );
 }
 
 void ProcessGameOverScreenInput() {

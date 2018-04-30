@@ -116,6 +116,8 @@ private:
     
     int level;
     
+    int lives;
+    
     Timer timer;
 };
 

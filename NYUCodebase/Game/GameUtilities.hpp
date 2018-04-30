@@ -52,6 +52,18 @@ GLuint LoadTexture(const char *filePath, GLuint filter);
 void DrawText(ShaderProgram& program, int fontTexture, std::string text, float size, float spacing);
 
 /*!
+ * @discussion Renders a string of text
+ * @param program The shader program to use for rendering
+ * @param fontTexture The id of the font texture
+ * @param text The text to render
+ * @param size The font size
+ * @param spacing The amount of spacing to use between each character
+ * @param x The x location of the string
+ * @param y The y location of the string
+ */
+void DrawWords (ShaderProgram& program, int fontTexture, std::string text, float size, float spacing, float x, float y);
+
+/*!
  * @abstract Renders a shape
  * @discussion Renders a shape via triangles
  * @param program The shader program to use for rendering

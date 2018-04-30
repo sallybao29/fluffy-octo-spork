@@ -23,7 +23,7 @@ std::unordered_set<unsigned int> solidTiles =
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
-GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
+GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr), lives (5) {}
 
 GameState::~GameState() {
     if (map != nullptr) {
@@ -129,6 +129,7 @@ void GameState::LoadLevel() {
 
 void GameState::Reset() {
     level = 1;
+    lives = 5;
     LoadLevel();
 }
 
@@ -367,7 +368,10 @@ void GameState::Update(float elapsed) {
         if (entity == player) continue;
         bool collided = player->CollidesWith(*entity);
         // If player contacts enemy, game over
-        if (collided) {
+        if (collided){
+            lives --;
+        }
+        if (lives == 0) {
             mode = STATE_GAME_OVER;
         }
     }

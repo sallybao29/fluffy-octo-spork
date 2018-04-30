@@ -2,6 +2,7 @@
 #include <sstream>
 #include "GameState.hpp"
 #include "Flyer.hpp"
+#include "Floater.hpp"
 
 #define ACCELERATION 15.0f
 #define VELOCITY_X 0.5f
@@ -80,15 +81,13 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Floating enemy
     else if (strcmp(type.data(), "enemyFloating") == 0) {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        Entity* entity = new Floater(entityX, entityY, 1.0f, 3.0f);
         // Offset gravity so it can fly
         entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
-        
-        entity->entityType = ENTITY_FLOATING;
-        entity->currentAction = ACTION_DEFENDING;
+
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
-        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating", 3.5, LOOP_ONCE, 2);
+        entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE, 2);
     }
     // Walking enemy
     else if (strcmp(type.data(), "enemyWalking") == 0) {
@@ -299,32 +298,19 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
                 // Speed of animation frame update is proportional to player's y velocity
                 frameSpeed = fabs(player->velocity.y) * elapsed;
             }
-            // Advance the animation frame
-            player->animations[player->currentAction]->NextFrame(frameSpeed);
             break;
         case ENTITY_WALKING:
-            entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
-            break;
-        case ENTITY_FLOATING:
-            if (entity.currentAction == ACTION_DEFENDING) {
-                
-            }
-            if (distance(player->position, entity.position) < 2.0f) {
-                entity.animations[ACTION_ATTACKING]->Reset();
-                entity.currentAction = ACTION_ATTACKING;
-            }
-            else {
-                entity.currentAction = ACTION_DEFENDING;
-            }
-            entity.animations[entity.currentAction]->NextFrame(frameSpeed);
-            // TODO
+            frameSpeed = entity.velocity.x * frameSpeed;
             break;
         case ENTITY_FLYING:
-            entity.animations[entity.currentAction]->NextFrame(0.10 * frameSpeed);
+            frameSpeed = 0.10 * frameSpeed;
             break;
         default:
             break;
     }
+    
+    // Advance the animation frame
+    entity.animations[entity.currentAction]->NextFrame(frameSpeed);
     // Retrieve the sprite for the current frame
     SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
     if (frame != entity.sprite) {
@@ -358,10 +344,10 @@ void GameState::Update(float elapsed) {
                 }
                 break;
             case ENTITY_FLYING:
-                if (entity->entityType == ENTITY_FLYING) {
-                    Flyer* flyer = (Flyer*)entity;
-                    flyer->Update(*player, elapsed);
-                }
+                ((Flyer*)entity)->Update(*player, elapsed);
+                break;
+            case ENTITY_FLOATING:
+                ((Floater*)entity)->Update(*player, elapsed);
                 break;
             default:
                 break;

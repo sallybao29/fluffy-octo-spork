@@ -58,7 +58,7 @@ void Entity::Render(ShaderProgram& program) {
         else if (!facingRight && velocity.x > 0) {
             facingRight = true;
         }
-        if (entityType == ENTITY_FLYING) {
+        if (entityType == ENTITY_FLYING || entityType == ENTITY_FLOATING) {
             facingRight = true;
         }
         sprite->reversed = !facingRight;

@@ -2,6 +2,7 @@
 #include <sstream>
 #include "GameState.hpp"
 #include "Flyer.hpp"
+#include "Floater.hpp"
 
 #define ACCELERATION 15.0f
 #define VELOCITY_X 0.5f
@@ -45,7 +46,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     float entityY = y * -map->tileSize - map->tileSize / 2;
     
     // Player entity
-    if (strcmp(type.data(), "playerBlue") == 0) {
+    if (type == "playerBlue") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entities.push_back(entity);
@@ -67,35 +68,49 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         player->animations[ACTION_JUMPING]->SetSpeed(30);
     }
     // Flying enemy
-    else if (strcmp(type.data(), "enemyFlying") == 0) {
+    else if (type == "enemyFlying") {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Flyer(entityX, entityY, 1.5f);
+        Flyer* entity = new Flyer(entityX, entityY, 1.5f);
+        // Offset gravity so it can fly
+        entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
     // Floating enemy
-    else if (strcmp(type.data(), "enemyFloating") == 0) {
+    else if (type == "enemyFloating") {
         // Create entity at position (entityX, entityY)
-        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        Floater* entity = new Floater(entityX, entityY, 1.5f, 0.3f, map->tileSize * 5);
+        // Offset gravity so it can float
+        entity->acceleration.y = GRAVITY;
         entities.push_back(entity);
-        
-        entity->entityType = ENTITY_FLOATING;
-        entity->currentAction = ACTION_DEFENDING;
+
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
         entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
     }
     // Walking enemy
-    else if (strcmp(type.data(), "enemyWalking") == 0) {
+    else if (type == "enemyWalking") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entity->velocity.x = VELOCITY_X;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
         entity->currentAction = ACTION_WALKING;
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_WALKING]->SetSpeed(30);
+    }
+    else if (type == "enemySwimming") {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entity->velocity.x = VELOCITY_X;
+        entities.push_back(entity);
+        
+        entity->entityType = ENTITY_SWIMMING;
+        entity->currentAction = ACTION_SWIMMING;
+        entity->AddAnimation(ACTION_SWIMMING, type, 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_SWIMMING]->SetSpeed(30);
     }
 }
 
@@ -208,6 +223,9 @@ void GameState::ProcessInput() {
                     timer.start();
                 }
             }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                Reset();
+            }
         }
     }
     // Walking
@@ -296,25 +314,73 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
                 // Speed of animation frame update is proportional to player's y velocity
                 frameSpeed = fabs(player->velocity.y) * elapsed;
             }
-            // Advance the animation frame
-            player->animations[player->currentAction]->NextFrame(frameSpeed);
             break;
         case ENTITY_WALKING:
-            entity.animations[entity.currentAction]->NextFrame(entity.velocity.x * frameSpeed);
+            frameSpeed = fabs(entity.velocity.x) * frameSpeed;
             break;
         case ENTITY_FLOATING:
-            // TODO
+            frameSpeed = entity.velocity.x * frameSpeed;
             break;
         case ENTITY_FLYING:
-            entity.animations[entity.currentAction]->NextFrame(0.10 * frameSpeed);
+            frameSpeed = 0.10 * frameSpeed;
             break;
         default:
             break;
     }
+    
+    // Advance the animation frame
+    entity.animations[entity.currentAction]->NextFrame(frameSpeed);
     // Retrieve the sprite for the current frame
     SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
     if (frame != entity.sprite) {
         entity.SetSprite(frame);
+    }
+}
+
+void GameState::CheckForTurn(Entity& entity) {
+    int boty = map->worldToTileCoordY(entity.position.y - entity.shape->size.y / 2 - map->tileSize / 4);
+    
+    if (entity.velocity.x < 0) {
+        int leftx = map -> worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 4);
+        
+        if (map -> mapData [boty][leftx] == 0 ||
+            solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end() ||
+            entity.collidedLeft) {
+            entity.velocity.x = VELOCITY_X * 0.75;
+        }
+        else {
+            entity.velocity.x = -VELOCITY_X * 0.75;
+        }
+    
+    }
+    else {
+        int rightx = map -> worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 4);
+         if (map -> mapData [boty][rightx] == 0 ||
+             solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end() || entity.collidedRight) {
+             entity.velocity.x = -VELOCITY_X * 0.75;
+         }
+         else {
+             entity.velocity.x = VELOCITY_X * 0.75;
+        }
+    }
+}
+
+void GameState::loseLifeReturn () {
+    lives --;
+    
+    //transport player back to beginning
+    for (int i = 0 ; i < map -> entities.size(); i++) {
+        if (map -> entities [i].type == "playerBlue") {
+            player -> position.x = map -> entities[i].x * map->tileSize + map->tileSize / 2;
+            player -> position.y = -map -> entities[i].y * map->tileSize - map->tileSize / 2;
+            player -> velocity.x = 0.0f;
+            break;
+        }
+    }
+    
+    // If player loses all lives, game over
+    if (lives == 0) {
+        mode = STATE_GAME_OVER;
     }
 }
 
@@ -344,15 +410,18 @@ void GameState::Update(float elapsed) {
                 }
                 break;
             case ENTITY_FLYING:
-                // Offset gravity so enemy can fly
-                if (entity->entityType == ENTITY_FLYING) {
-                    entity->acceleration.y = GRAVITY;
-                    Flyer* flyer = (Flyer*)entity;
-                    flyer->Update(*player, elapsed);
-                }
+                ((Flyer*)entity)->Update(*player, elapsed);
+                
                 break;
             case ENTITY_FLOATING:
-                entity->acceleration.y = GRAVITY;
+                ((Floater*)entity)->Update(*player, elapsed);
+                // Remove bullets that hit solid objects on the map
+                for (Bullet& bullet : ((Floater*)entity)->bullets) {
+                    bullet.CollideWithMap(*map, solidTiles);
+                }
+                break;
+            case ENTITY_WALKING:
+                CheckForTurn(*entity);
                 break;
             default:
                 break;
@@ -366,13 +435,37 @@ void GameState::Update(float elapsed) {
     for (size_t i = 0; i < entities.size(); i++) {
         Entity* entity = entities[i];
         if (entity == player) continue;
-        bool collided = player->CollidesWith(*entity);
-        // If player contacts enemy, game over
-        if (collided){
-            lives --;
+        std::pair<float, float> penetration;
+        bool collided = player->CollidesWith(*entity, penetration);
+        if (collided) {
+            // Adjust player by collision amount
+            if (player->currentAction == ACTION_DEFENDING) {
+                player->position.x += penetration.first;
+                player->position.y += penetration.second;
+                
+                player->velocity.y = 0.0f;
+            }
+            else {
+                loseLifeReturn();
+            }
         }
-        if (lives == 0) {
-            mode = STATE_GAME_OVER;
+        if (entity->entityType == ENTITY_FLOATING) {
+            Floater* floater = (Floater*) entity;
+            // Check collision with bullets
+            for (Bullet& bullet : floater -> bullets) {
+                bool collided = bullet.CollidesWith(*player);
+                if (collided) {
+                    // Play sound
+                    if (player -> currentAction != ACTION_DEFENDING) {
+                        lives--;
+                        
+                        if (!lives ) {
+                            mode = STATE_GAME_OVER;
+                        }
+                        return;
+                    }
+                }
+            }
         }
     }
     
@@ -451,6 +544,4 @@ void GameState::RenderBackground(float viewX, float viewY) {
     stream << "hills_" << level;
     DrawTexture(*shader, textures[stream.str()]);
 }
-
-
 

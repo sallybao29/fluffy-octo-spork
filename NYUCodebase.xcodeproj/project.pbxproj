@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4820C6A92094FC1B000ABDAA /* Flyer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6A72094FC1B000ABDAA /* Flyer.cpp */; };
 		4820C6AF209666BE000ABDAA /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6AD209666BE000ABDAA /* Walker.cpp */; };
+		4820C6AC20965427000ABDAA /* Floater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6AA20965427000ABDAA /* Floater.cpp */; };
 		484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */; };
 		4861880E2092AB3E006C8722 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4861880C2092AB3E006C8722 /* Timer.cpp */; };
 		486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 486AE322208C4109008A6F70 /* SpriteAnimation.cpp */; };
@@ -42,6 +43,8 @@
 		4820C6A82094FC1B000ABDAA /* Flyer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Flyer.hpp; sourceTree = "<group>"; };
 		4820C6AD209666BE000ABDAA /* Walker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Walker.cpp; sourceTree = "<group>"; };
 		4820C6AE209666BE000ABDAA /* Walker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Walker.hpp; sourceTree = "<group>"; };
+		4820C6AA20965427000ABDAA /* Floater.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Floater.cpp; sourceTree = "<group>"; };
+		4820C6AB20965427000ABDAA /* Floater.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Floater.hpp; sourceTree = "<group>"; };
 		484BEC0220898CD000B8CA79 /* rapidxml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml.hpp; sourceTree = "<group>"; };
 		484BEC0420898E8900B8CA79 /* rapidxml_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rapidxml_utils.hpp; path = NYUCodebase/rapidxml_utils.hpp; sourceTree = SOURCE_ROOT; };
 		484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TextureAtlasParser.cpp; sourceTree = "<group>"; };
@@ -169,6 +172,8 @@
 				48D414B820630B9B00FC4896 /* SheetSprite.hpp */,
 				4820C6A72094FC1B000ABDAA /* Flyer.cpp */,
 				4820C6A82094FC1B000ABDAA /* Flyer.hpp */,
+				4820C6AA20965427000ABDAA /* Floater.cpp */,
+				4820C6AB20965427000ABDAA /* Floater.hpp */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -352,6 +357,7 @@
 				48D414B920630B9B00FC4896 /* SheetSprite.cpp in Sources */,
 				48D414B22063044100FC4896 /* GameUtilities.cpp in Sources */,
 				48FAC7A6207EBB2E0081078D /* SatCollision.cpp in Sources */,
+				4820C6AC20965427000ABDAA /* Floater.cpp in Sources */,
 				48D414AC2062DC8100FC4896 /* GameState.cpp in Sources */,
 				6DEF23C21B96CC2600BCE792 /* Matrix.cpp in Sources */,
 				6D5A86BA19AE5C710066C1FD /* main.cpp in Sources */,

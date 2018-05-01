@@ -93,6 +93,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (type == "enemyWalking") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entity->velocity.x = VELOCITY_X;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
@@ -303,6 +304,9 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             }
             break;
         case ENTITY_WALKING:
+            frameSpeed = fabs(entity.velocity.x) * frameSpeed;
+            break;
+        case ENTITY_FLOATING:
             frameSpeed = entity.velocity.x * frameSpeed;
             break;
         case ENTITY_FLYING:
@@ -318,6 +322,34 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
     SheetSprite* frame = entity.animations[entity.currentAction]->GetCurrentFrame();
     if (frame != entity.sprite) {
         entity.SetSprite(frame);
+    }
+}
+
+void GameState::CheckForTurn(Entity& entity) {
+    int boty = map->worldToTileCoordY(entity.position.y - entity.shape->size.y / 2 - map->tileSize / 4);
+    
+    if (entity.velocity.x < 0) {
+        int leftx = map -> worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 4);
+        
+        if (map -> mapData [boty][leftx] == 0 ||
+            solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end() ||
+            entity.collidedLeft) {
+            entity.velocity.x = VELOCITY_X * 0.75;
+        }
+        else {
+            entity.velocity.x = -VELOCITY_X * 0.75;
+        }
+    
+    }
+    else {
+        int rightx = map -> worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 4);
+         if (map -> mapData [boty][rightx] == 0 ||
+             solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end() || entity.collidedRight) {
+             entity.velocity.x = -VELOCITY_X * 0.75;
+         }
+         else {
+             entity.velocity.x = VELOCITY_X * 0.75;
+        }
     }
 }
 
@@ -356,6 +388,9 @@ void GameState::Update(float elapsed) {
                 for (Bullet& bullet : ((Floater*)entity)->bullets) {
                     bullet.CollideWithMap(*map, solidTiles);
                 }
+                break;
+            case ENTITY_WALKING:
+                CheckForTurn(*entity);
                 break;
             default:
                 break;

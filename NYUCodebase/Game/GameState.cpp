@@ -316,10 +316,8 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             }
             break;
         case ENTITY_WALKING:
+        case ENTITY_SWIMMING:
             frameSpeed = fabs(entity.velocity.x) * frameSpeed;
-            break;
-        case ENTITY_FLOATING:
-            frameSpeed = entity.velocity.x * frameSpeed;
             break;
         case ENTITY_FLYING:
             frameSpeed = 0.10 * frameSpeed;

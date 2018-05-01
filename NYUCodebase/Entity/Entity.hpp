@@ -90,7 +90,7 @@ public:
      * sprite will be rendered as plain polygons based on their shape property
      * @param program The shader program to use when rendering
      */
-    void Render(ShaderProgram& program);
+    virtual void Render(ShaderProgram& program);
     
     /*!
      * @discussion Assigns the entity a new sprite and adjusts its size accordingly
@@ -119,7 +119,7 @@ public:
      * @param other The entity being collided against
      * @return Whether the collision occurred
      */
-    bool CollidesWith(Entity& other);
+    bool CollidesWith(Entity& other, std::pair<float, float>& penetration);
     
     /*!
      * @discussion Adds an animation for the given entity action

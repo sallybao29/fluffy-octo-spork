@@ -77,12 +77,7 @@ public:
     void Update(Entity& target, float elapsed);
     
     void Render(ShaderProgram& program) override;
-    
-    /*!
-     * @discussion Checks if any bullets collide with the target
-     * @param target The entity to check collision against
-     */
-    void CollideWithBullets(Entity& target);
+
     
     std::vector<Bullet> bullets;
     int bulletIndex;

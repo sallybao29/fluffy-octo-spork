@@ -107,6 +107,11 @@ private:
     
     void CheckForTurn(Entity& entity);
     
+    /*!
+     *@discussion Returns player back to starting position upon losing a life
+     */
+    void loseLifeReturn ();
+    
     ShaderProgram* shader;
     Matrix modelMatrix;
     Matrix viewMatrix;
@@ -117,6 +122,8 @@ private:
     std::vector<Entity*> entities;
     
     int level;
+    
+    int lives;
     
     Timer timer;
 };

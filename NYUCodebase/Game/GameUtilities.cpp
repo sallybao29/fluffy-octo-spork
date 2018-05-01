@@ -64,6 +64,14 @@ void DrawText(ShaderProgram& program, int fontTexture, std::string text, float s
     glDisableVertexAttribArray(program.texCoordAttribute);
 }
 
+void DrawWords (ShaderProgram& program, int fontTexture, std::string text, float size, float spacing, float x, float y) {
+    Matrix modelMatrix;
+    modelMatrix.Translate(x, y, 0.0f);
+    program.SetModelMatrix(modelMatrix);
+    
+    DrawText(program, fontTexture, text, size, spacing);
+}
+
 void DrawShape(ShaderProgram& program, const Shape& shape) {
     const std::vector<float>& triangles = shape.triangles();
     glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, triangles.data());

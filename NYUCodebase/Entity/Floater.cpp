@@ -138,19 +138,3 @@ void Floater::Render(ShaderProgram& program) {
         }
     }
 }
-
-void Floater::CollideWithBullets(Entity& target) {
-    for (Bullet& bullet : bullets) {
-        bool collided = bullet.CollidesWith(target);
-        if (collided) {
-            // Play sound
-            if (target.currentAction != ACTION_DEFENDING) {
-                // TODO: Target loses hp
-                // Invulnerability mode
-                // Maybe play a hurt sound
-                return;
-            }
-        }
-    }
-}
-

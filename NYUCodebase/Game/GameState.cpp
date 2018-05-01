@@ -24,7 +24,7 @@ std::unordered_set<unsigned int> solidTiles =
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
-GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr) {}
+GameState::GameState(ShaderProgram* program) : shader(program), level(1), map(nullptr), lives (5) {}
 
 GameState::~GameState() {
     if (map != nullptr) {
@@ -101,6 +101,17 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_WALKING]->SetSpeed(30);
     }
+    else if (type == "enemySwimming") {
+        // Create entity at position (entityX, entityY)
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entity->velocity.x = VELOCITY_X;
+        entities.push_back(entity);
+        
+        entity->entityType = ENTITY_SWIMMING;
+        entity->currentAction = ACTION_SWIMMING;
+        entity->AddAnimation(ACTION_SWIMMING, type, 3.5, LOOP_REVERSE, 3);
+        entity->animations[ACTION_SWIMMING]->SetSpeed(30);
+    }
 }
 
 void GameState::LoadLevel() {
@@ -133,6 +144,7 @@ void GameState::LoadLevel() {
 
 void GameState::Reset() {
     level = 1;
+    lives = 5;
     LoadLevel();
 }
 
@@ -304,10 +316,8 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             }
             break;
         case ENTITY_WALKING:
+        case ENTITY_SWIMMING:
             frameSpeed = fabs(entity.velocity.x) * frameSpeed;
-            break;
-        case ENTITY_FLOATING:
-            frameSpeed = entity.velocity.x * frameSpeed;
             break;
         case ENTITY_FLYING:
             frameSpeed = 0.10 * frameSpeed;
@@ -350,6 +360,25 @@ void GameState::CheckForTurn(Entity& entity) {
          else {
              entity.velocity.x = VELOCITY_X * 0.75;
         }
+    }
+}
+
+void GameState::loseLifeReturn () {
+    lives --;
+    
+    //transport player back to beginning
+    for (int i = 0 ; i < map -> entities.size(); i++) {
+        if (map -> entities [i].type == "playerBlue") {
+            player -> position.x = map -> entities[i].x * map->tileSize + map->tileSize / 2;
+            player -> position.y = -map -> entities[i].y * map->tileSize - map->tileSize / 2;
+            player -> velocity.x = 0.0f;
+            break;
+        }
+    }
+    
+    // If player loses all lives, game over
+    if (lives == 0) {
+        mode = STATE_GAME_OVER;
     }
 }
 
@@ -415,12 +444,26 @@ void GameState::Update(float elapsed) {
                 player->velocity.y = 0.0f;
             }
             else {
-                // If player loses all lives, game over
+                loseLifeReturn();
             }
         }
         if (entity->entityType == ENTITY_FLOATING) {
+            Floater* floater = (Floater*) entity;
             // Check collision with bullets
-            ((Floater*)entity)->CollideWithBullets(*player);
+            for (Bullet& bullet : floater -> bullets) {
+                bool collided = bullet.CollidesWith(*player);
+                if (collided) {
+                    // Play sound
+                    if (player -> currentAction != ACTION_DEFENDING) {
+                        lives--;
+                        
+                        if (!lives ) {
+                            mode = STATE_GAME_OVER;
+                        }
+                        return;
+                    }
+                }
+            }
         }
     }
     
@@ -499,6 +542,4 @@ void GameState::RenderBackground(float viewX, float viewY) {
     stream << "hills_" << level;
     DrawTexture(*shader, textures[stream.str()]);
 }
-
-
 

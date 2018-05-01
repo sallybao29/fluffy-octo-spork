@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4820C6A92094FC1B000ABDAA /* Flyer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6A72094FC1B000ABDAA /* Flyer.cpp */; };
-		4820C6AF209666BE000ABDAA /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6AD209666BE000ABDAA /* Walker.cpp */; };
 		4820C6AC20965427000ABDAA /* Floater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4820C6AA20965427000ABDAA /* Floater.cpp */; };
 		484BEC072089A3AD00B8CA79 /* TextureAtlasParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484BEC052089A3AD00B8CA79 /* TextureAtlasParser.cpp */; };
 		4861880E2092AB3E006C8722 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4861880C2092AB3E006C8722 /* Timer.cpp */; };
@@ -41,8 +40,6 @@
 /* Begin PBXFileReference section */
 		4820C6A72094FC1B000ABDAA /* Flyer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Flyer.cpp; sourceTree = "<group>"; };
 		4820C6A82094FC1B000ABDAA /* Flyer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Flyer.hpp; sourceTree = "<group>"; };
-		4820C6AD209666BE000ABDAA /* Walker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Walker.cpp; sourceTree = "<group>"; };
-		4820C6AE209666BE000ABDAA /* Walker.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Walker.hpp; sourceTree = "<group>"; };
 		4820C6AA20965427000ABDAA /* Floater.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Floater.cpp; sourceTree = "<group>"; };
 		4820C6AB20965427000ABDAA /* Floater.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Floater.hpp; sourceTree = "<group>"; };
 		484BEC0220898CD000B8CA79 /* rapidxml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml.hpp; sourceTree = "<group>"; };
@@ -162,8 +159,6 @@
 		4898130D20803CE800D9B749 /* Entity */ = {
 			isa = PBXGroup;
 			children = (
-				4820C6AD209666BE000ABDAA /* Walker.cpp */,
-				4820C6AE209666BE000ABDAA /* Walker.hpp */,
 				48D414BA2063122A00FC4896 /* Entity.cpp */,
 				48D414BB2063122A00FC4896 /* Entity.hpp */,
 				48FAC7A1207EBB110081078D /* Shape.cpp */,
@@ -348,7 +343,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4898130A20803B5200D9B749 /* Vector3.cpp in Sources */,
-				4820C6AF209666BE000ABDAA /* Walker.cpp in Sources */,
 				48D414BC2063122A00FC4896 /* Entity.cpp in Sources */,
 				486AE324208C4109008A6F70 /* SpriteAnimation.cpp in Sources */,
 				4861880E2092AB3E006C8722 /* Timer.cpp in Sources */,

@@ -18,7 +18,7 @@
 std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 234, 256,
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193,
     // Green world
     66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
 };
@@ -111,6 +111,13 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->currentAction = ACTION_SWIMMING;
         entity->AddAnimation(ACTION_SWIMMING, type, 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_SWIMMING]->SetSpeed(30);
+    }
+    else if (type == "keyGreen") {
+        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        entities.push_back(entity);
+        entity -> entityType = ENTITY_KEY;
+        entity -> currentAction = ACTION_NONE;
+        entity->AddAnimation(ACTION_NONE, type, 3.5, LOOP_NONE);
     }
 }
 
@@ -440,7 +447,12 @@ void GameState::Update(float elapsed) {
         if (entity == player) continue;
         std::pair<float, float> penetration;
         bool collided = player->CollidesWith(*entity, penetration);
-        if (collided) {
+        if (collided && entity -> entityType == ENTITY_KEY) {
+            keyCollected = true;
+            entity -> position.x = -5.0f;
+        }
+        
+        else if (collided) {
             // Adjust player by collision amount
             if (player->currentAction == ACTION_DEFENDING) {
                 player->position.x += penetration.first;
@@ -474,6 +486,24 @@ void GameState::Update(float elapsed) {
                 }
             }
         }
+    }
+    
+    // Check if player has key and is at door
+    int x = map -> worldToTileCoordX(player -> position.x);
+    int y = map -> worldToTileCoordY(player -> position.y);
+    if (keyCollected && x < map -> mapWidth &&
+        y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
+        if (level < 3) {
+            level++;
+        }
+        else {
+            // render some kind of win page
+        }
+    }
+    
+    if (x < map -> mapWidth && y < map -> mapHeight &&
+        (map -> mapData [y][x] - 1 == 234 || map -> mapData [y][x] - 1 == 235 )) {
+            loseLifeReturn();
     }
     
     // Keep player in bounds of map

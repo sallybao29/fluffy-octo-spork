@@ -30,6 +30,7 @@ enum EntityType {
     ENTITY_SWIMMING,
     ENTITY_SPIKEY,
     ENTITY_FLOATING,
+    ENTITY_KEY,
     ENTITY_NONE
 };
 

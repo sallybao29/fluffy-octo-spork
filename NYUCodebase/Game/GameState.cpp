@@ -115,12 +115,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (type == "keyGreen") {
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entities.push_back(entity);
-        entity -> currentAction = ACTION_NONE;
-        entity->AddAnimation(ACTION_NONE, type, 3.5, LOOP_NONE);
-    }
-    else if (type == "blockBrown") {
-        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entities.push_back(entity);
+        entity -> entityType = ENTITY_KEY;
         entity -> currentAction = ACTION_NONE;
         entity->AddAnimation(ACTION_NONE, type, 3.5, LOOP_NONE);
     }
@@ -447,7 +442,27 @@ void GameState::Update(float elapsed) {
         if (entity == player) continue;
         std::pair<float, float> penetration;
         bool collided = player->CollidesWith(*entity, penetration);
-        if (collided) {
+        if (collided && entity -> entityType == ENTITY_KEY) {
+            keyCollected = true;
+            entity -> position.x = -5.0f;
+        }
+        
+        else if (collided && entity -> entityType == ENTITY_BLOCK) {
+            if (player -> position.x < entity -> position.x) {
+                entity -> position.x -= penetration.first;
+                entity -> position.y -= penetration.second;
+                if (entity -> position.y < player -> position.y) {
+                    entity -> entityType = ENTITY_NONE;
+                }
+            }
+        }
+        else if (collided && entity -> entityType == ENTITY_NONE) {
+            if (player -> position.y > entity -> position.y) {
+                player -> position.x += penetration.first;
+                player -> position.y += penetration.second;
+            }
+        }
+        else if (collided) {
             // Adjust player by collision amount
             if (player->currentAction == ACTION_DEFENDING) {
                 player->position.x += penetration.first;

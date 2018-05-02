@@ -125,6 +125,8 @@ private:
     
     int lives;
     
+    bool keyCollected = false;
+    
     Timer timer;
 };
 

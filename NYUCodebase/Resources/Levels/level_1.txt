@@ -77,7 +77,3 @@ location=12,20,1,1
 type=playerBlue
 location=1,21,1,1
 
-[ObjectsLayer]
-type=blockBrow
-location=30,9,1,1
-

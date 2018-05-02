@@ -447,21 +447,6 @@ void GameState::Update(float elapsed) {
             entity -> position.x = -5.0f;
         }
         
-        else if (collided && entity -> entityType == ENTITY_BLOCK) {
-            if (player -> position.x < entity -> position.x) {
-                entity -> position.x -= penetration.first;
-                entity -> position.y -= penetration.second;
-                if (entity -> position.y < player -> position.y) {
-                    entity -> entityType = ENTITY_NONE;
-                }
-            }
-        }
-        else if (collided && entity -> entityType == ENTITY_NONE) {
-            if (player -> position.y > entity -> position.y) {
-                player -> position.x += penetration.first;
-                player -> position.y += penetration.second;
-            }
-        }
         else if (collided) {
             // Adjust player by collision amount
             if (player->currentAction == ACTION_DEFENDING) {
@@ -492,6 +477,13 @@ void GameState::Update(float elapsed) {
                 }
             }
         }
+    }
+    
+    // Check if player has key and is at door
+    int x = map -> worldToTileCoordX(player -> position.x);
+    int y = map -> worldToTileCoordY(player -> position.y);
+    if (keyCollected && map -> mapData [y][x] - 1 == 127) {
+        level++;
     }
     
     // Keep player in bounds of map

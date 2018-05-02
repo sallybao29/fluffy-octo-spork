@@ -482,7 +482,8 @@ void GameState::Update(float elapsed) {
     // Check if player has key and is at door
     int x = map -> worldToTileCoordX(player -> position.x);
     int y = map -> worldToTileCoordY(player -> position.y);
-    if (keyCollected && map -> mapData [y][x] - 1 == 127) {
+    if (keyCollected && x < map -> mapWidth &&
+        y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
         level++;
     }
     

@@ -484,7 +484,12 @@ void GameState::Update(float elapsed) {
     int y = map -> worldToTileCoordY(player -> position.y);
     if (keyCollected && x < map -> mapWidth &&
         y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
-        level++;
+        if (level < 3) {
+            level++;
+        }
+        else {
+            // render some kind of win page
+        }
     }
     
     if (x < map -> mapWidth && y < map -> mapHeight &&

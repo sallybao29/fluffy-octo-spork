@@ -22,6 +22,8 @@ GameState state(&program);
 
 std::map<std::string, GLuint> textures;
 
+std::map<std::string, Mix_Chunk*> sounds;
+
 TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.xml");
 
 /*-------------------------------------------- Functions ---------------------------------------------*/
@@ -114,6 +116,16 @@ void Render() {
     SDL_GL_SwapWindow(displayWindow);
 }
 
+void LoadSounds() {
+    sounds["jump"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/jump.wav");
+    sounds["land"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/land.wav");
+    sounds["hurt"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/hurt.wav");
+    sounds["defense"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/defense_hit.wav");
+    sounds["bounce"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/bounce.wav");
+    
+    Mix_VolumeChunk(sounds["jump"], 20);
+}
+
 void Setup() {
     SDL_Init(SDL_INIT_VIDEO);
     displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowSize.x, windowSize.y, SDL_WINDOW_OPENGL);
@@ -172,8 +184,10 @@ void Setup() {
         streamLoad << RESOURCE_FOLDER << "Resources/Backgrounds/set" << i << "_tiles.png";
         GLuint tiles = LoadTexture(streamLoad.str().data(), GL_NEAREST);
         textures [stream.str ()] = tiles;
-        
     }
+    
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+    LoadSounds();
     
     // Initialize the game state
     state.Initialize();

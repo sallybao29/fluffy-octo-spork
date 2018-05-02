@@ -221,6 +221,7 @@ void GameState::ProcessInput() {
                     // Reset the jumping animation
                     player->animations[ACTION_JUMPING]->Reset();
                     timer.start();
+                    Mix_PlayChannel(-1, sounds["jump"], 0);
                 }
             }
             else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
@@ -392,11 +393,14 @@ void GameState::Update(float elapsed) {
                     if (player->collidedRight) {
                         player->velocity.x = -VELOCITY_X * 2.0f;
                         player->velocity.y = JUMP_VELOCITY * 0.75f;
+                        Mix_PlayChannel(-1, sounds["bounce"], 0);
                     }
                     else if (player->collidedLeft) {
                         player->velocity.x = VELOCITY_X * 2.0f;
                         player->velocity.y = JUMP_VELOCITY * 0.75f;
+                        Mix_PlayChannel(-1, sounds["bounce"], 0);
                     }
+                    
                 }
                 // Ground bounce in ball form
                 // Flawed: Only bounces if a jump was initiated
@@ -405,6 +409,7 @@ void GameState::Update(float elapsed) {
                          player->currentAction == ACTION_DEFENDING &&
                          player->previousAction == ACTION_JUMPING) {
                     player->velocity.y = JUMP_VELOCITY * 1.2f;
+                    Mix_PlayChannel(-1, sounds["bounce"], 0);
                 }
                 break;
             case ENTITY_FLYING:
@@ -444,6 +449,7 @@ void GameState::Update(float elapsed) {
                 player->velocity.y = 0.0f;
             }
             else {
+                Mix_PlayChannel(-1, sounds["hurt"], 0);
                 loseLifeReturn();
             }
         }
@@ -453,14 +459,17 @@ void GameState::Update(float elapsed) {
             for (Bullet& bullet : floater -> bullets) {
                 bool collided = bullet.CollidesWith(*player);
                 if (collided) {
-                    // Play sound
                     if (player -> currentAction != ACTION_DEFENDING) {
                         lives--;
                         
                         if (!lives ) {
                             mode = STATE_GAME_OVER;
                         }
+                        Mix_PlayChannel(-1, sounds["hurt"], 0);
                         return;
+                    }
+                    else {
+                        Mix_PlayChannel(-1, sounds["defense"], 0);
                     }
                 }
             }

@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include "TextureAtlasParser.hpp"
+#include <SDL_mixer.h>
 
 #define TILES "tiles"
 #define OBJECTS "objecs"
@@ -114,6 +115,8 @@ extern GameMode mode;
 
 /// Dictionary of textures loaded for the game
 extern std::map<std::string, GLuint> textures;
+
+extern std::map<std::string, Mix_Chunk*> sounds;
 
 extern TextureAtlasParser textureAtlas;
 

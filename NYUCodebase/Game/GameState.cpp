@@ -450,6 +450,7 @@ void GameState::Update(float elapsed) {
         if (collided && entity -> entityType == ENTITY_KEY) {
             keyCollected = true;
             entity -> position.x = -5.0f;
+            Mix_PlayChannel(-1, sounds["fanfare"], 0);
         }
         
         else if (collided) {
@@ -494,6 +495,7 @@ void GameState::Update(float elapsed) {
     if (keyCollected && x < map -> mapWidth &&
         y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
         if (level < 3) {
+            Mix_PlayChannel(-1, sounds["door_open"], 0);
             level++;
         }
         else {

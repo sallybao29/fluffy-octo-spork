@@ -122,8 +122,10 @@ void LoadSounds() {
     sounds["hurt"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/hurt.wav");
     sounds["defense"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/defense_hit.wav");
     sounds["bounce"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/bounce.wav");
+    sounds["fanfare"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/fanfare.wav");
+    sounds["door_open"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/door_open.wav");
     
-    Mix_VolumeChunk(sounds["jump"], 20);
+    Mix_VolumeChunk(sounds["jump"], 25);
 }
 
 void Setup() {

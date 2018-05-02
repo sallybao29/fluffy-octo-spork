@@ -18,7 +18,7 @@
 std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193, 234, 256,
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193,
     // Green world
     66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
 };
@@ -485,6 +485,11 @@ void GameState::Update(float elapsed) {
     if (keyCollected && x < map -> mapWidth &&
         y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
         level++;
+    }
+    
+    if (x < map -> mapWidth && y < map -> mapHeight &&
+        (map -> mapData [y][x] - 1 == 234 || map -> mapData [y][x] - 1 == 235 )) {
+            loseLifeReturn();
     }
     
     // Keep player in bounds of map

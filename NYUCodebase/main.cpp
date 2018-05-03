@@ -117,6 +117,8 @@ void Render() {
 }
 
 void LoadSounds() {
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+    
     sounds["jump"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/jump.wav");
     sounds["land"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/land.wav");
     sounds["hurt"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/hurt.wav");
@@ -188,7 +190,6 @@ void Setup() {
         textures [stream.str ()] = tiles;
     }
     
-    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
     LoadSounds();
     
     // Initialize the game state

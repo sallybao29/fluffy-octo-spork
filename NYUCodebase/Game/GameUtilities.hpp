@@ -97,6 +97,16 @@ std::vector<std::pair<float, float>> ToWorldSpace(const Matrix& matrix, const st
  */
 float lerp(float v0, float v1, float t);
 
+float easeIn(float from, float to, float time);
+
+float easeOut(float from, float to, float time);
+
+float easeInOut(float from, float to, float time);
+
+float easeOutElastic(float from, float to, float time);
+
+float mapValue(float value, float srcMin, float srcMax, float dstMin, float dstMax);
+
 // Globals
 extern SDL_Window* displayWindow;
 /// The dimensions of the display window

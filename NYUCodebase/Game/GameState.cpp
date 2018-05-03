@@ -541,6 +541,9 @@ void GameState::Render() {
     
     // Draw entities
     for (size_t i = 0; i < entities.size(); i++) {
+        Entity& entity = *entities[i];
+        entity.scale.y = mapValue(fabs(entity.velocity.y), 0.0f, 5.0f, 1.0f, 1.2f);
+        entity.scale.x = mapValue(fabs(entity.velocity.y), 5.0f, 0.0f, 0.8f, 1.0f);
         entities[i]->Render(*shader);
     }
 }

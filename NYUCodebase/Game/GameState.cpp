@@ -504,6 +504,10 @@ void GameState::Update(float elapsed) {
     else if (player->position.x + player->shape->size.x / 2 > map->mapWidth * map->tileSize) {
         player->position.x = map->mapWidth * map->tileSize - player->shape->size.x / 2 - DELTA;
     }
+    
+    animationTime += elapsed;
+    float alpha = mapValue(animationTime, 0.0f, animationEnd, 0.0f, 1.0f);
+    shader->SetAlpha(lerp(0.0f, 1.0f, alpha));
 }
 
 /*------------------------------------------- Rendering ----------------------------------------------*/

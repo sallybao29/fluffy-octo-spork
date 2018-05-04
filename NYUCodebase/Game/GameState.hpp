@@ -128,6 +128,9 @@ private:
     bool keyCollected = false;
     
     Timer timer;
+    
+    float animationTime = 0.0f;
+    float animationEnd = 1.0f;
 };
 
 #endif

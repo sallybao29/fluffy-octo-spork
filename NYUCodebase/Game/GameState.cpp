@@ -147,6 +147,9 @@ void GameState::LoadLevel() {
     if (player == nullptr) {
         assert(false);
     }
+    
+    // Reset animation time for transition to next level
+    animationTime = 0.0f;
 }
 
 void GameState::Reset() {
@@ -230,7 +233,7 @@ void GameState::ProcessInput() {
                     timer.start();
                 }
             }
-            else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
                 Reset();
             }
         }

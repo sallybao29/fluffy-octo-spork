@@ -23,6 +23,7 @@ GameState state(&program);
 std::map<std::string, GLuint> textures;
 
 std::map<std::string, Mix_Chunk*> sounds;
+Mix_Music* music;
 
 TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.xml");
 
@@ -36,6 +37,7 @@ void ProcessTitleScreenInput() {
         else if (event.type == SDL_KEYDOWN) {
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
                 mode = STATE_GAME_LEVEL;
+                Mix_PlayMusic(music, -1);
             }
         }
     }
@@ -128,6 +130,9 @@ void LoadSounds() {
     sounds["door_open"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/door_open.wav");
     
     Mix_VolumeChunk(sounds["jump"], 25);
+    Mix_VolumeChunk(sounds["hurt"], 25);
+    
+    music = Mix_LoadMUS(RESOURCE_FOLDER"Resources/Sounds/bgm.mp3");
 }
 
 void Setup() {

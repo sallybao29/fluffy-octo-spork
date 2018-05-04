@@ -118,6 +118,8 @@ extern std::map<std::string, GLuint> textures;
 
 extern std::map<std::string, Mix_Chunk*> sounds;
 
+extern Mix_Music* music;
+
 extern TextureAtlasParser textureAtlas;
 
 

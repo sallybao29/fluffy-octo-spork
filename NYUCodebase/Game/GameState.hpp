@@ -130,7 +130,7 @@ private:
     Timer timer;
     
     float animationTime = 0.0f;
-    float animationEnd = 1.0f;
+    float animationEnd = 3.0f;
 };
 
 #endif

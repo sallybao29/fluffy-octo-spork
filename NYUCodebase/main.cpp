@@ -138,8 +138,8 @@ void Setup() {
     
     // Load textures
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_NEAREST);
-    GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_LINEAR);
-    fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_LINEAR);
+    GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_NEAREST);
+    fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_NEAREST);
     
     // Store texture references in lookup table
     textures[TILES] = tiles;

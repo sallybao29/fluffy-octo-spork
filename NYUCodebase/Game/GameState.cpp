@@ -4,8 +4,8 @@
 #include "Flyer.hpp"
 #include "Floater.hpp"
 
-#define ACCELERATION 15.0f
-#define VELOCITY_X 0.5f
+#define ACCELERATION 20.0f
+#define VELOCITY_X 0.7f
 #define JUMP_VELOCITY 4.5f
 #define FRICTION 0.6f
 #define GRAVITY 4.9f
@@ -19,8 +19,8 @@ std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
     0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193,
-    // Green world
-    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
+    // Yellow world
+    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 128, 192, 232, 254,
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
@@ -100,17 +100,6 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->currentAction = ACTION_WALKING;
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_WALKING]->SetSpeed(30);
-    }
-    else if (type == "enemySwimming") {
-        // Create entity at position (entityX, entityY)
-        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entity->velocity.x = VELOCITY_X;
-        entities.push_back(entity);
-        
-        entity->entityType = ENTITY_SWIMMING;
-        entity->currentAction = ACTION_SWIMMING;
-        entity->AddAnimation(ACTION_SWIMMING, type, 3.5, LOOP_REVERSE, 3);
-        entity->animations[ACTION_SWIMMING]->SetSpeed(30);
     }
     else if (type == "keyGreen") {
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
@@ -234,7 +223,9 @@ void GameState::ProcessInput() {
                 }
             }
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-                Reset();
+                //Reset();
+                level++;
+                LoadLevel();
             }
         }
     }
@@ -257,10 +248,10 @@ void GameState::ProcessInput() {
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 2.5f * VELOCITY_X;
+            player->velocity.x = 2.0f * VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -2.5f * VELOCITY_X;
+            player->velocity.x = -2.0f * VELOCITY_X;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -449,13 +440,11 @@ void GameState::Update(float elapsed) {
             keyCollected = true;
             entity -> position.x = -5.0f;
         }
-        
         else if (collided) {
             // Adjust player by collision amount
             if (player->currentAction == ACTION_DEFENDING) {
                 player->position.x += penetration.first;
                 player->position.y += penetration.second;
-                
                 player->velocity.y = 0.0f;
             }
             else {
@@ -472,7 +461,7 @@ void GameState::Update(float elapsed) {
                     if (player -> currentAction != ACTION_DEFENDING) {
                         lives--;
                         
-                        if (!lives ) {
+                        if (!lives) {
                             mode = STATE_GAME_OVER;
                         }
                         return;
@@ -489,14 +478,17 @@ void GameState::Update(float elapsed) {
         y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
         if (level < 3) {
             level++;
+            LoadLevel();
         }
         else {
             // render some kind of win page
         }
     }
     
+    // Check collision with liquid tiles
     if (x < map -> mapWidth && y < map -> mapHeight &&
         (map -> mapData [y][x] - 1 == 234 || map -> mapData [y][x] - 1 == 235 )) {
+        if (player->currentAction != ACTION_DEFENDING)
             loseLifeReturn();
     }
     

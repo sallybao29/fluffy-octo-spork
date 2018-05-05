@@ -51,10 +51,6 @@ location=45,13,1,1
 
 [ObjectsLayer]
 type=enemyFloating
-location=37,11,1,1
-
-[ObjectsLayer]
-type=enemyFloating
 location=7,4,1,1
 
 [ObjectsLayer]

@@ -201,5 +201,7 @@ public:
     bool collidedLeft;
     /// Right contact flag
     bool collidedRight;
+    // Whether the entity is static or dynamic
+    bool isStatic;
 };
 #endif

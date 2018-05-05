@@ -61,6 +61,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         player = entity;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
+        player->isStatic = false;
         
         // Walking
         player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
@@ -80,6 +81,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         Flyer* entity = new Flyer(entityX, entityY, 1.5f);
         // Offset gravity so it can fly
         entity->acceleration.y = GRAVITY;
+        entity->isStatic = false;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
@@ -91,6 +93,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         Floater* entity = new Floater(entityX, entityY, 1.6f, 0.4f, map->tileSize * 5);
         // Offset gravity so it can float
         entity->acceleration.y = GRAVITY;
+        entity->isStatic = true;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
@@ -101,6 +104,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entity->velocity.x = VELOCITY_X;
+        entity->isStatic = false;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
@@ -111,10 +115,12 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Block
     else if (type == "blockBrown") {
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
+        //blocks.push_back(entity);
         entities.push_back(entity);
-        entity -> entityType = ENTITY_BLOCK;
-        entity -> currentAction = ACTION_NONE;
-        entity->AddAnimation(ACTION_NONE, type, 2, LOOP_NONE);
+        entity->entityType = ENTITY_BLOCK;
+        entity->currentAction = ACTION_NONE;
+        entity->isStatic = true;
+        entity->AddAnimation(ACTION_NONE, type, 2.5, LOOP_NONE);
     }
 }
 
@@ -140,6 +146,7 @@ void GameState::LoadLevel() {
     for (int i = 0; i < map->entities.size(); i++) {
         PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
     }
+    
     // Ensure that the player has been created
     if (player == nullptr) {
         assert(false);
@@ -435,8 +442,6 @@ void GameState::Update(float elapsed) {
                     }
                 }
                 // Ground bounce in ball form
-                // Flawed: Only bounces if a jump was initiated
-                // If player transitions from defense form to walking mid-jump, ground bounce will fail
                 else if (player->collidedBottom &&
                          player->currentAction == ACTION_DEFENDING &&
                          player->previousAction == ACTION_JUMPING) {
@@ -460,11 +465,10 @@ void GameState::Update(float elapsed) {
             default:
                 break;
         }
-        
         UpdatePhysics(*entity, elapsed);
         UpdateAnimation(*entity, elapsed);
     }
-    
+
     ResolveEntityCollisions();
     
     // Get player's tile coordinates
@@ -514,46 +518,41 @@ void GameState::ResolveEntityCollision(Entity& one, Entity& two) {
     bool collided = one.CollidesWith(two, penetration);
     if (!collided) return;
     
-    // Player collision against other entities
-    if (one.entityType == ENTITY_PLAYER) {
-        if (two.entityType == ENTITY_BLOCK) {
-            //player->position.x += penetration.first;
-            //player->position.y += penetration.second;
-        }
-        else if (two.entityType != ENTITY_BLOCK) {
-            // Adjust player by collision amount
-            if (player->currentAction == ACTION_DEFENDING) {
-                player->position.x += penetration.first;
-                player->position.y += penetration.second;
-                player->velocity.y = 0.0f;
-            }
-            // Lose a life upon collision with enemy entities
-            else {
+    // Static on static entity collision
+    if (one.isStatic && two.isStatic) {
+        // Adjust both by half the penetration
+        one.position.x += penetration.first * 0.5f;
+        one.position.y += penetration.second * 0.5f;
+        
+        two.position.x -= penetration.first * 0.5f;
+        two.position.y -= penetration.second * 0.5f;
+    }
+    // Dynamic on static entity collision
+    else if (!one.isStatic && two.isStatic) {
+        // Adjust the dynamic one by the full penetration
+        one.position.x += penetration.first;
+        one.position.y += penetration.second;
+    }
+    else if (one.isStatic && !two.isStatic) {
+        // Adjust the dynamic one by the full penetration
+        two.position.x -= penetration.first;
+        two.position.y -= penetration.second;
+    }
+    // Dynamic on dynamic entity collision
+    else if (!one.isStatic && !two.isStatic) {
+        // Let dynamic entities of the same type ignore each other
+        if (one.entityType == two.entityType) return;
+        // Adjust the both by the half the penetration
+        one.position.x += penetration.first * 0.5f;
+        one.position.y += penetration.second * 0.5f;
+        
+        two.position.x -= penetration.first * 0.5f;
+        two.position.y -= penetration.second * 0.5f;
+        
+        if (one.entityType == ENTITY_PLAYER || two.entityType == ENTITY_PLAYER) {
+            if (player->currentAction != ACTION_DEFENDING) {
                 loseLifeReturn();
             }
-        }
-    }
-    // Block collision
-    else if (one.entityType == ENTITY_BLOCK) {
-        // If blocks are colliding with other blocks, adjust by half the penetration for each
-        if (two.entityType == ENTITY_BLOCK) {
-            one.position.x += penetration.first;
-            one.position.y += penetration.second;
-            
-            //two.position.x -= penetration.first * 0.5f;
-            //two.position.y -= penetration.second * 0.5f;
-            
-            one.velocity.y = 0.0f;
-            one.velocity.x = 0.0f;
-            
-            //two.velocity.y = 0.0f;
-            //two.velocity.x = 0.0f;
-        }
-    }
-    else if (one.entityType == ENTITY_WALKING) {
-        if (two.entityType == ENTITY_BLOCK) {
-            one.position.x += penetration.first;
-            one.position.y += penetration.second;
         }
     }
 }
@@ -561,7 +560,7 @@ void GameState::ResolveEntityCollision(Entity& one, Entity& two) {
 void GameState::ResolveEntityCollisions() {
     for (size_t i = 0; i < entities.size(); i++) {
         Entity& entityOne = *entities[i];
-        for (size_t j = 0; j < entities.size(); j++) {
+        for (size_t j = i; j < entities.size(); j++) {
             Entity& entityTwo = *entities[j];
             ResolveEntityCollision(entityOne, entityTwo);
         }

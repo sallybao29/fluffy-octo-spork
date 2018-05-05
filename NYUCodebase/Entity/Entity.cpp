@@ -80,6 +80,30 @@ bool Entity::CollidesWith(Entity& other, std::pair<float, float>& penetration) {
     std::vector<std::pair<float, float>> e1Points = ToWorldSpace(modelMatrix, shape->points());
     std::vector<std::pair<float, float>> e2Points = ToWorldSpace(other.modelMatrix, other.shape->points());
     bool collided = CheckSATCollision(e1Points, e2Points, penetration);
+    
+    if (!collided) return false;
+    
+    //float delta = 0.001f;
+    float delta = 0.0f;
+    
+    if (penetration.first > delta) {
+        collidedLeft = true;
+        other.collidedRight = true;
+    }
+    else if (penetration.first < -delta) {
+        collidedRight = true;
+        other.collidedLeft = true;
+    }
+    if (penetration.second > delta) {
+        collidedBottom = true;
+        other.collidedTop = true;
+        velocity.y = 0.0f;
+    }
+    else if (penetration.second < -delta) {
+        collidedTop = true;
+        other.collidedBottom = true;
+        velocity.y = 0.0f;
+    }
 
     return collided;
 }

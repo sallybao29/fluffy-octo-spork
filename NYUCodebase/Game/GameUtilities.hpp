@@ -29,7 +29,8 @@ class Shape;
 enum GameMode {
     STATE_TITLE_SCREEN,
     STATE_GAME_LEVEL,
-    STATE_GAME_OVER
+    STATE_GAME_OVER,
+    STATE_GAME_WON
 };
 
 // Utility functions

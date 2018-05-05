@@ -108,9 +108,18 @@ private:
     void CheckForTurn(Entity& entity);
     
     /*!
+     * @discussion Checks if any events are triggered by the value of the current tile the player is standing at.
+     */
+    void CheckTileEvent(int tileX, int tileY);
+    
+    /*!
      *@discussion Returns player back to starting position upon losing a life
      */
     void loseLifeReturn ();
+    
+    void ResolveEntityCollisions();
+    
+    void ResolveEntityCollision(Entity& one, Entity& two);
     
     ShaderProgram* shader;
     Matrix modelMatrix;
@@ -125,7 +134,7 @@ private:
     
     int lives;
     
-    bool keyCollected = false;
+    int keyCount = 1;
     
     Timer timer;
     

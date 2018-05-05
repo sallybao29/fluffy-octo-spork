@@ -183,3 +183,4 @@ int FlareMap::worldToTileCoordX(float worldX) const {
 int FlareMap::worldToTileCoordY(float worldY) const {
     return (int) (-worldY / tileSize);
 }
+

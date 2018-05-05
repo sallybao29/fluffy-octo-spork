@@ -31,6 +31,7 @@ enum EntityType {
     ENTITY_SPIKEY,
     ENTITY_FLOATING,
     ENTITY_KEY,
+    ENTITY_BLOCK,
     ENTITY_NONE
 };
 

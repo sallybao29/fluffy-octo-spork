@@ -110,7 +110,7 @@ private:
     /*!
      * @discussion Checks if any events are triggered by the value of the current tile the player is standing at.
      */
-    void CheckTileEvent(int tileX, int tileY);
+    void CheckTileEvent();
     
     /*!
      *@discussion Returns player back to starting position upon losing a life
@@ -135,12 +135,12 @@ private:
     
     int lives;
     
-    int keyCount = 1;
+    int keyCount = 0;
     
     Timer timer;
     
     float animationTime = 0.0f;
-    float animationEnd = 3.0f;
+    float animationEnd = 2.0f;
 };
 
 #endif

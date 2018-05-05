@@ -30,7 +30,8 @@ class Shape;
 enum GameMode {
     STATE_TITLE_SCREEN,
     STATE_GAME_LEVEL,
-    STATE_GAME_OVER
+    STATE_GAME_OVER,
+    STATE_GAME_WON
 };
 
 // Utility functions
@@ -97,6 +98,16 @@ std::vector<std::pair<float, float>> ToWorldSpace(const Matrix& matrix, const st
  * @return The interpolated value
  */
 float lerp(float v0, float v1, float t);
+
+float easeIn(float from, float to, float time);
+
+float easeOut(float from, float to, float time);
+
+float easeInOut(float from, float to, float time);
+
+float easeOutElastic(float from, float to, float time);
+
+float mapValue(float value, float srcMin, float srcMax, float dstMin, float dstMax);
 
 // Globals
 extern SDL_Window* displayWindow;

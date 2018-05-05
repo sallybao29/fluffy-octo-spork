@@ -108,9 +108,18 @@ private:
     void CheckForTurn(Entity& entity);
     
     /*!
+     * @discussion Checks if any events are triggered by the value of the current tile the player is standing at.
+     */
+    void CheckTileEvent();
+    
+    /*!
      *@discussion Returns player back to starting position upon losing a life
      */
     void loseLifeReturn ();
+    
+    void ResolveEntityCollisions();
+    
+    void ResolveEntityCollision(Entity& one, Entity& two);
     
     ShaderProgram* shader;
     Matrix modelMatrix;
@@ -120,14 +129,18 @@ private:
     
     Entity* player;
     std::vector<Entity*> entities;
+    std::vector<Entity*> blocks;
     
     int level;
     
     int lives;
     
-    bool keyCollected = false;
+    int keyCount = 0;
     
     Timer timer;
+    
+    float animationTime = 0.0f;
+    float animationEnd = 2.0f;
 };
 
 #endif

@@ -4,8 +4,8 @@
 #include "Flyer.hpp"
 #include "Floater.hpp"
 
-#define ACCELERATION 15.0f
-#define VELOCITY_X 0.5f
+#define ACCELERATION 20.0f
+#define VELOCITY_X 0.7f
 #define JUMP_VELOCITY 4.5f
 #define FRICTION 0.6f
 #define GRAVITY 4.9f
@@ -15,12 +15,19 @@
 
 #define DELTA 0.00001f
 
+#define KEY 101
+#define LOCK 128
+#define DOOR 127
+
+#define FLUID_RED 234
+#define FLUID_BROWN 235
+
 std::unordered_set<unsigned int> solidTiles =
 {
     // Red world
     0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193,
-    // Green world
-    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 232, 254
+    // Yellow world
+    66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 128, 192, 232, 254,
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
@@ -54,6 +61,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         player = entity;
         player->currentAction = ACTION_WALKING;
         player->entityType = ENTITY_PLAYER;
+        player->isStatic = false;
         
         // Walking
         player->AddAnimation(ACTION_WALKING, "playerBlue_walk", 3, LOOP_REVERSE, 3);
@@ -73,6 +81,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         Flyer* entity = new Flyer(entityX, entityY, 1.5f);
         // Offset gravity so it can fly
         entity->acceleration.y = GRAVITY;
+        entity->isStatic = false;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
@@ -81,9 +90,10 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Floating enemy
     else if (type == "enemyFloating") {
         // Create entity at position (entityX, entityY)
-        Floater* entity = new Floater(entityX, entityY, 1.5f, 0.3f, map->tileSize * 5);
+        Floater* entity = new Floater(entityX, entityY, 1.6f, 0.4f, map->tileSize * 5);
         // Offset gravity so it can float
         entity->acceleration.y = GRAVITY;
+        entity->isStatic = true;
         entities.push_back(entity);
 
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
@@ -94,6 +104,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
         entity->velocity.x = VELOCITY_X;
+        entity->isStatic = false;
         entities.push_back(entity);
         
         entity->entityType = ENTITY_WALKING;
@@ -101,23 +112,15 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->AddAnimation(ACTION_WALKING, type, 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_WALKING]->SetSpeed(30);
     }
-    else if (type == "enemySwimming") {
-        // Create entity at position (entityX, entityY)
+    // Block
+    else if (type == "blockBrown") {
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entity->velocity.x = VELOCITY_X;
+        //blocks.push_back(entity);
         entities.push_back(entity);
-        
-        entity->entityType = ENTITY_SWIMMING;
-        entity->currentAction = ACTION_SWIMMING;
-        entity->AddAnimation(ACTION_SWIMMING, type, 3.5, LOOP_REVERSE, 3);
-        entity->animations[ACTION_SWIMMING]->SetSpeed(30);
-    }
-    else if (type == "keyGreen") {
-        Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entities.push_back(entity);
-        entity -> entityType = ENTITY_KEY;
-        entity -> currentAction = ACTION_NONE;
-        entity->AddAnimation(ACTION_NONE, type, 3.5, LOOP_NONE);
+        entity->entityType = ENTITY_BLOCK;
+        entity->currentAction = ACTION_NONE;
+        entity->isStatic = true;
+        entity->AddAnimation(ACTION_NONE, type, 2.5, LOOP_NONE);
     }
 }
 
@@ -143,10 +146,17 @@ void GameState::LoadLevel() {
     for (int i = 0; i < map->entities.size(); i++) {
         PlaceEntity(map->entities[i].type, map->entities[i].x, map->entities[i].y);
     }
+    
     // Ensure that the player has been created
     if (player == nullptr) {
         assert(false);
     }
+    
+    // Reset animation time for transition to next level
+    animationTime = 0.0f;
+    
+    // Reset keys to 0
+    keyCount = 0;
 }
 
 void GameState::Reset() {
@@ -159,8 +169,18 @@ void GameState::Reset() {
 bool GameState::ResolveCollisionY(Entity& entity, int x, int y, float size) {
     // Only resolve collision if tile is solid
     if (x < 0 || y < 0 ||
+        x > map->mapWidth || y > map->mapHeight ||
         map->mapData[y][x] == 0 ||
         solidTiles.find(map->mapData[y][x] - 1) == solidTiles.end()) return false;
+    
+    if (entity.entityType == ENTITY_PLAYER) {
+        // Check if player unlocks lock
+        if (map->mapData[y][x] - 1 == LOCK && keyCount) {
+            Mix_PlayChannel(-1, sounds["door_open"], 0);
+            map->mapData[y][x] = 0;
+            keyCount--;
+        }
+    }
     
     // Move tile coordinates to center of tile
     float centerY = -y * size - size / 2;
@@ -170,8 +190,18 @@ bool GameState::ResolveCollisionY(Entity& entity, int x, int y, float size) {
 bool GameState::ResolveCollisionX(Entity& entity, int x, int y, float size) {
     // Only resolve collision if tile is solid
     if (x < 0 || y < 0 ||
+        x > map->mapWidth || y > map->mapHeight ||
         map->mapData[y][x] == 0 ||
         solidTiles.find(map->mapData[y][x] - 1) == solidTiles.end()) return false;
+    
+    if (entity.entityType == ENTITY_PLAYER) {
+        // Check if player unlocks lock
+        if (map->mapData[y][x] - 1 == LOCK && keyCount) {
+            Mix_PlayChannel(-1, sounds["door_open"], 0);
+            map->mapData[y][x] = 0;
+            keyCount--;
+        }
+    }
     
     // Move tile coordinates to center of tile
     float centerX = x * size + size / 2;
@@ -231,7 +261,13 @@ void GameState::ProcessInput() {
                     Mix_PlayChannel(-1, sounds["jump"], 0);
                 }
             }
-            else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+                // Skip to next level
+                level++;
+                LoadLevel();
+            }
+            if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+                // Reset entire game
                 Reset();
             }
         }
@@ -255,10 +291,10 @@ void GameState::ProcessInput() {
     // If jumping, allow left/right velocity to be set
     else if (timer.isRunning()) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = 2.5f * VELOCITY_X;
+            player->velocity.x = 2.0f * VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -2.5f * VELOCITY_X;
+            player->velocity.x = -2.0f * VELOCITY_X;
         }
         // End of jump
         if (timer.isOver(0.3f)) {
@@ -324,7 +360,6 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
             }
             break;
         case ENTITY_WALKING:
-        case ENTITY_SWIMMING:
             frameSpeed = fabs(entity.velocity.x) * frameSpeed;
             break;
         case ENTITY_FLYING:
@@ -344,30 +379,31 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 }
 
 void GameState::CheckForTurn(Entity& entity) {
-    int boty = map->worldToTileCoordY(entity.position.y - entity.shape->size.y / 2 - map->tileSize / 4);
+    int midY = map->worldToTileCoordY(entity.position.y);
     
     if (entity.velocity.x < 0) {
-        int leftx = map -> worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 4);
-        
-        if (map -> mapData [boty][leftx] == 0 ||
-            solidTiles.find(map->mapData[boty][leftx] - 1) == solidTiles.end() ||
+        // Pick a point a little to the left of the entity
+        int leftX = map->worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 5);
+        // If there's something solid to the left, turn around
+        if (solidTiles.find(map->mapData[midY][leftX] - 1) != solidTiles.end() ||
             entity.collidedLeft) {
-            entity.velocity.x = VELOCITY_X * 0.75;
+            entity.velocity.x = VELOCITY_X * 0.80;
         }
-        else {
-            entity.velocity.x = -VELOCITY_X * 0.75;
-        }
-    
+        // Otherwise keep going
+        else
+            entity.velocity.x = -VELOCITY_X * 0.80;
     }
     else {
-        int rightx = map -> worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 4);
-         if (map -> mapData [boty][rightx] == 0 ||
-             solidTiles.find(map->mapData[boty][rightx] - 1) == solidTiles.end() || entity.collidedRight) {
-             entity.velocity.x = -VELOCITY_X * 0.75;
-         }
-         else {
-             entity.velocity.x = VELOCITY_X * 0.75;
+        // Pick a point a little to the right of the entity
+        int rightX = map->worldToTileCoordX(entity.position.x + (entity.shape->size.x / 2) + map->tileSize / 5);
+        // If there's something solid to the right, turn around
+        if (solidTiles.find(map->mapData[midY][rightX] - 1) != solidTiles.end() ||
+            entity.collidedRight) {
+            entity.velocity.x = -VELOCITY_X * 0.80;
         }
+        // Otherwise turn around
+        else
+            entity.velocity.x = VELOCITY_X * 0.80;
     }
 }
 
@@ -410,8 +446,6 @@ void GameState::Update(float elapsed) {
                     
                 }
                 // Ground bounce in ball form
-                // Flawed: Only bounces if a jump was initiated
-                // If player transitions from defense form to walking mid-jump, ground bounce will fail
                 else if (player->collidedBottom &&
                          player->currentAction == ACTION_DEFENDING &&
                          player->previousAction == ACTION_JUMPING) {
@@ -436,77 +470,13 @@ void GameState::Update(float elapsed) {
             default:
                 break;
         }
-        
         UpdatePhysics(*entity, elapsed);
         UpdateAnimation(*entity, elapsed);
     }
+
+    ResolveEntityCollisions();
     
-    // Check collision of player against enemy
-    for (size_t i = 0; i < entities.size(); i++) {
-        Entity* entity = entities[i];
-        if (entity == player) continue;
-        std::pair<float, float> penetration;
-        bool collided = player->CollidesWith(*entity, penetration);
-        if (collided && entity -> entityType == ENTITY_KEY) {
-            keyCollected = true;
-            entity -> position.x = -5.0f;
-            Mix_PlayChannel(-1, sounds["fanfare"], 0);
-        }
-        
-        else if (collided) {
-            // Adjust player by collision amount
-            if (player->currentAction == ACTION_DEFENDING) {
-                player->position.x += penetration.first;
-                player->position.y += penetration.second;
-                
-                player->velocity.y = 0.0f;
-            }
-            else {
-                Mix_PlayChannel(-1, sounds["hurt"], 0);
-                loseLifeReturn();
-            }
-        }
-        if (entity->entityType == ENTITY_FLOATING) {
-            Floater* floater = (Floater*) entity;
-            // Check collision with bullets
-            for (Bullet& bullet : floater -> bullets) {
-                bool collided = bullet.CollidesWith(*player);
-                if (collided) {
-                    if (player -> currentAction != ACTION_DEFENDING) {
-                        lives--;
-                        
-                        if (!lives ) {
-                            mode = STATE_GAME_OVER;
-                        }
-                        Mix_PlayChannel(-1, sounds["hurt"], 0);
-                        return;
-                    }
-                    else {
-                        Mix_PlayChannel(-1, sounds["defense"], 0);
-                    }
-                }
-            }
-        }
-    }
-    
-    // Check if player has key and is at door
-    int x = map -> worldToTileCoordX(player -> position.x);
-    int y = map -> worldToTileCoordY(player -> position.y);
-    if (keyCollected && x < map -> mapWidth &&
-        y < map -> mapHeight && map -> mapData [y][x] - 1 == 127) {
-        if (level < 3) {
-            Mix_PlayChannel(-1, sounds["door_open"], 0);
-            level++;
-        }
-        else {
-            // render some kind of win page
-        }
-    }
-    
-    if (x < map -> mapWidth && y < map -> mapHeight &&
-        (map -> mapData [y][x] - 1 == 234 || map -> mapData [y][x] - 1 == 235 )) {
-            loseLifeReturn();
-    }
+    CheckTileEvent();
     
     // Keep player in bounds of map
     if (player->position.x - player->shape->size.x / 2 < 0) {
@@ -514,6 +484,125 @@ void GameState::Update(float elapsed) {
     }
     else if (player->position.x + player->shape->size.x / 2 > map->mapWidth * map->tileSize) {
         player->position.x = map->mapWidth * map->tileSize - player->shape->size.x / 2 - DELTA;
+    }
+    
+    // Update animation (tweening)
+    animationTime += elapsed;
+    float alpha = mapValue(animationTime, 0.0f, animationEnd, 0.0f, 1.0f);
+    shader->SetAlpha(lerp(0.0f, 1.0f, alpha));
+}
+
+void GameState::CheckTileEvent() {
+    // Get player's tile coordinates
+    int tileX, tileY, tileVal;
+    map->worldToTileCoordinates(player->position.x, player->position.y, tileX, tileY);
+    // Clamp tile value to one if indices are out of bounds
+    if (tileX < 0 || tileY < 0 ||
+        tileX > map->mapWidth || tileY > map->mapHeight ||
+        map->mapData[tileY][tileX] == 0) tileVal = 0;
+    else
+        tileVal = map->mapData[tileY][tileX] - 1;
+    
+    // Collect key
+    if (tileVal == KEY) {
+        Mix_PlayChannel(-1, sounds["fanfare"], 0);
+        map->mapData[tileY][tileX] = 0;
+        keyCount++;
+    }
+    // Check if player unlocks door to next level
+    else if (keyCount && tileVal == DOOR) {
+        Mix_PlayChannel(-1, sounds["door_open"], 0);
+        if (level == 3) {
+            mode = STATE_GAME_WON;
+            return;
+        }
+        level++;
+        LoadLevel();
+    }
+    // Check if player falls into fluid
+    else if (tileVal == FLUID_RED || tileVal == FLUID_BROWN) {
+        loseLifeReturn();
+    }
+}
+
+void GameState::ResolveEntityCollision(Entity& one, Entity& two) {
+    // Don't compare if one and two are the same object
+    if (&one == &two) return;
+    // Let dynamic entities of the same type ignore each other
+    if (!one.isStatic && !two.isStatic && one.entityType == two.entityType) return;
+    
+    std::pair<float, float> penetration;
+    bool collided = one.CollidesWith(two, penetration);
+    if (!collided) return;
+    
+    // Static on static entity collision
+    if (one.isStatic && two.isStatic) {
+        // Adjust the top-most one by the full penetration
+        if (penetration.second > 0.0)
+            one.position.y += penetration.second;
+        else
+            two.position.y -= penetration.second;
+    }
+    // Dynamic on static entity collision
+    else if (!one.isStatic && two.isStatic) {
+        // Adjust the dynamic one by the full penetration
+        one.position.x += penetration.first;
+        one.position.y += penetration.second;
+    }
+    // Static on dynamic entity collision
+    else if (one.isStatic && !two.isStatic) {
+        // Adjust the dynamic one by the full penetration
+        two.position.x -= penetration.first;
+        two.position.y -= penetration.second;
+    }
+    // Dynamic on dynamic entity collision
+    else if (!one.isStatic && !two.isStatic) {
+        // Adjust the both by the half the penetration
+        one.position.x += penetration.first * 0.5f;
+        one.position.y += penetration.second * 0.5f;
+        
+        two.position.x -= penetration.first * 0.5f;
+        two.position.y -= penetration.second * 0.5f;
+        
+        if (one.entityType == ENTITY_PLAYER || two.entityType == ENTITY_PLAYER) {
+            if (player->currentAction != ACTION_DEFENDING)
+                Mix_PlayChannel(-1, sounds["hurt"], 0);
+                loseLifeReturn();
+        }
+    }
+}
+
+void GameState::ResolveEntityCollisions() {
+    for (size_t i = 0; i < entities.size(); i++) {
+        Entity& entityOne = *entities[i];
+        for (size_t j = i; j < entities.size(); j++) {
+            Entity& entityTwo = *entities[j];
+            ResolveEntityCollision(entityOne, entityTwo);
+        }
+    }
+    
+    // Check player bullet collision
+    for (size_t i = 0; i < entities.size(); i++) {
+        Entity* entity = entities[i];
+        if (entity->entityType == ENTITY_FLOATING) {
+            Floater* floater = (Floater*)entity;
+            // Check collision with bullets
+            for (Bullet& bullet : floater->bullets) {
+                bool collided = bullet.CollidesWith(*player);
+                if (collided) {
+                    if (player->currentAction != ACTION_DEFENDING) {
+                        lives--;
+                        if (!lives)
+                            mode = STATE_GAME_OVER;
+                    
+                        Mix_PlayChannel(-1, sounds["hurt"], 0);
+                        return;
+                    }
+                    else
+                        Mix_PlayChannel(-1, sounds["defense"], 0);
+                }
+            }
+        }
     }
 }
 
@@ -552,7 +641,11 @@ void GameState::Render() {
     
     // Draw entities
     for (size_t i = 0; i < entities.size(); i++) {
-        entities[i]->Render(*shader);
+        Entity& entity = *entities[i];
+        // Apply squashing and squeezing based on magnitude of y velocity
+        entity.scale.y = mapValue(fabs(entity.velocity.y), 0.0f, 5.0f, 1.0f, 1.2f);
+        entity.scale.x = mapValue(fabs(entity.velocity.y), 5.0f, 0.0f, 0.8f, 1.0f);
+        entity.Render(*shader);
     }
 }
 

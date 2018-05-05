@@ -29,6 +29,18 @@ TextureAtlasParser textureAtlas(RESOURCE_FOLDER"Resources/Spritesheets/spriteshe
 
 /*-------------------------------------------- Functions ---------------------------------------------*/
 
+void ProcessWinScreeInput() {
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+            done = true;
+        }
+    }
+}
+
+void RenderWinScreen() {
+    
+}
+
 void ProcessTitleScreenInput() {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -44,8 +56,8 @@ void ProcessTitleScreenInput() {
 }
 
 void RenderTitleScreen() {
-    DrawWords(program, fonts, "FLUFFY OCTO", 0.4f, 0.0f, -1*(-0.5f * 0.4) - (11*0.4/2), 0.5f );
-    DrawWords(program, fonts, "Press Space to Play", 0.2f, 0.0f, -1*(-0.5f * 0.2) - (19*0.2/2), -0.5f );
+    DrawWords(program, fonts, "FLUFFY OCTO", 0.4f, 0.0f, 0.0f, 0.5f);
+    DrawWords(program, fonts, "Press Space to Play", 0.2f, 0.0f, 0.0f, -0.5f);
 }
 
 void ProcessGameOverScreenInput() {
@@ -81,6 +93,9 @@ void ProcessEvents() {
         case STATE_GAME_LEVEL:
             state.ProcessInput();
             break;
+        case STATE_GAME_WON:
+            ProcessWinScreeInput();
+            break;
         default:
             break;
     }
@@ -112,6 +127,9 @@ void Render() {
         case STATE_GAME_OVER:
             RenderGameOver();
             break;
+        case STATE_GAME_WON:
+            RenderWinScreen();
+            break;
         default:
             break;
     }
@@ -131,6 +149,8 @@ void LoadSounds() {
     
     Mix_VolumeChunk(sounds["jump"], 25);
     Mix_VolumeChunk(sounds["hurt"], 25);
+    
+    Mix_VolumeMusic(30);
     
     music = Mix_LoadMUS(RESOURCE_FOLDER"Resources/Sounds/bgm.mp3");
 }
@@ -159,8 +179,8 @@ void Setup() {
     
     // Load textures
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_NEAREST);
-    GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_LINEAR);
-    fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_LINEAR);
+    GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_NEAREST);
+    fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_NEAREST);
     
     // Store texture references in lookup table
     textures[TILES] = tiles;

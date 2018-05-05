@@ -31,6 +31,7 @@ enum EntityType {
     ENTITY_SPIKEY,
     ENTITY_FLOATING,
     ENTITY_KEY,
+    ENTITY_BLOCK,
     ENTITY_NONE
 };
 
@@ -200,5 +201,7 @@ public:
     bool collidedLeft;
     /// Right contact flag
     bool collidedRight;
+    // Whether the entity is static or dynamic
+    bool isStatic;
 };
 #endif

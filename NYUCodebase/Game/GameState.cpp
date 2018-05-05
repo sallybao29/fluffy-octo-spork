@@ -520,12 +520,11 @@ void GameState::ResolveEntityCollision(Entity& one, Entity& two) {
     
     // Static on static entity collision
     if (one.isStatic && two.isStatic) {
-        // Adjust both by half the penetration
-        one.position.x += penetration.first * 0.5f;
-        one.position.y += penetration.second * 0.5f;
-        
-        two.position.x -= penetration.first * 0.5f;
-        two.position.y -= penetration.second * 0.5f;
+        // Adjust the top-most one by the full penetration
+        if (penetration.second > 0.0)
+            one.position.y += penetration.second;
+        else
+            two.position.y -= penetration.second;
     }
     // Dynamic on static entity collision
     else if (!one.isStatic && two.isStatic) {

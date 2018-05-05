@@ -77,8 +77,8 @@ void ProcessGameOverScreenInput() {
 void RenderGameOver() {
     Matrix viewMatrix;
     program.SetViewMatrix(viewMatrix);
-    DrawWords(program, fonts, "GAME OVER", 0.4f, 0.0f, -1*(-0.5f * 0.4) - (9*0.4/2), 0.5f );
-    DrawWords(program, fonts, "Press Start to Play Again", 0.2f, 0.0f, -1*(-0.5f * 0.2) - (25*0.2/2), -0.5f );
+    DrawWords(program, fonts, "GAME OVER", 0.4f, 0.0f, 0.0f, 0.5f);
+    DrawWords(program, fonts, "Press Start to Play Again", 0.2f, 0.0f, 0.0f, -0.5f);
     
 }
 

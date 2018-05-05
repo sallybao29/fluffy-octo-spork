@@ -28,6 +28,8 @@ std::unordered_set<unsigned int> solidTiles =
     0, 1, 2, 3, 4, 5, 6, 7, 8, 22, 27, 28, 29, 30, 44, 49, 50, 51, 52, 193,
     // Yellow world
     66, 67, 68, 69, 70, 71, 72, 73, 74, 88, 93, 94, 95, 96, 110, 115, 116, 117, 118, 128, 192, 232, 254,
+    // Blue world
+    132, 133, 134, 135, 136, 137, 138, 139, 140, 154, 159, 160, 161, 162, 176, 181, 182, 183, 184
 };
 
 /*----------------------------------- Initialization/Setup ------------------------------------------*/
@@ -263,6 +265,10 @@ void GameState::ProcessInput() {
             }
             if (event.key.keysym.scancode == SDL_SCANCODE_N) {
                 // Skip to next level
+                if (level == 3) {
+                    mode = STATE_GAME_WON;
+                    return;
+                }
                 level++;
                 LoadLevel();
             }
@@ -565,9 +571,10 @@ void GameState::ResolveEntityCollision(Entity& one, Entity& two) {
         two.position.y -= penetration.second * 0.5f;
         
         if (one.entityType == ENTITY_PLAYER || two.entityType == ENTITY_PLAYER) {
-            if (player->currentAction != ACTION_DEFENDING)
+            if (player->currentAction != ACTION_DEFENDING) {
                 Mix_PlayChannel(-1, sounds["hurt"], 0);
                 loseLifeReturn();
+            }
         }
     }
 }

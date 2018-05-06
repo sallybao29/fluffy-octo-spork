@@ -11,11 +11,12 @@ SDL_Window* displayWindow;
 Vector3 windowSize(1280, 720, 0);
 Vector3 projection(2.0f * windowSize.x / windowSize.y, 2.0f, 1.0f);
 ShaderProgram program;
-GLuint fonts;
 
 SDL_Event event;
 bool done = false;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
+
+Matrix projectionMatrix, viewMatrix;
 
 GameMode mode = STATE_TITLE_SCREEN;
 GameState state(&program);
@@ -38,7 +39,11 @@ void ProcessWinScreeInput() {
 }
 
 void RenderWinScreen() {
-    
+    viewMatrix.Identity();
+    program.SetViewMatrix(viewMatrix);
+    DrawWords(program, textures[FONT], "YOU WIN!", 0.4f, 0.0f, 0.0f, 0.5f);
+    DrawWords(program, textures[FONT], "Weary from your journey,", 0.2f, 0.0f, 0.0f, -0.5f);
+    DrawWords(program, textures[FONT], "you finally return home...", 0.2f, 0.0f, 0.0f, -0.7f);
 }
 
 void ProcessTitleScreenInput() {
@@ -56,8 +61,8 @@ void ProcessTitleScreenInput() {
 }
 
 void RenderTitleScreen() {
-    DrawWords(program, fonts, "FLUFFY OCTO", 0.4f, 0.0f, 0.0f, 0.5f);
-    DrawWords(program, fonts, "Press Space to Play", 0.2f, 0.0f, 0.0f, -0.5f);
+    DrawWords(program, textures[FONT], "FLUFFY OCTO", 0.4f, 0.0f, 0.0f, 0.5f);
+    DrawWords(program, textures[FONT], "Press Space to Play", 0.2f, 0.0f, 0.0f, -0.5f);
 }
 
 void ProcessGameOverScreenInput() {
@@ -75,11 +80,10 @@ void ProcessGameOverScreenInput() {
 }
 
 void RenderGameOver() {
-    Matrix viewMatrix;
+    viewMatrix.Identity();
     program.SetViewMatrix(viewMatrix);
-    DrawWords(program, fonts, "GAME OVER", 0.4f, 0.0f, 0.0f, 0.5f);
-    DrawWords(program, fonts, "Press Start to Play Again", 0.2f, 0.0f, 0.0f, -0.5f);
-    
+    DrawWords(program, textures[FONT], "GAME OVER", 0.4f, 0.0f, 0.0f, 0.5f);
+    DrawWords(program, textures[FONT], "Press Start to Play Again", 0.2f, 0.0f, 0.0f, -0.5f);
 }
 
 void ProcessEvents() {
@@ -146,6 +150,7 @@ void LoadSounds() {
     sounds["bounce"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/bounce.wav");
     sounds["fanfare"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/fanfare.wav");
     sounds["door_open"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/door_open.wav");
+    sounds["flyer"] = Mix_LoadWAV(RESOURCE_FOLDER"Resources/Sounds/flyer_cry.wav");
     
     Mix_VolumeChunk(sounds["jump"], 25);
     Mix_VolumeChunk(sounds["hurt"], 25);
@@ -165,8 +170,6 @@ void Setup() {
 #endif
     glViewport(0, 0, windowSize.x, windowSize.y);
     
-    Matrix projectionMatrix, viewMatrix;
-    
     program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
     projectionMatrix.SetOrthoProjection(-projection.x, projection.x, -projection.y, projection.y, -projection.z, projection.z);
     
@@ -180,11 +183,12 @@ void Setup() {
     // Load textures
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_NEAREST);
     GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_NEAREST);
-    fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_NEAREST);
+    GLuint fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_NEAREST);
     
     // Store texture references in lookup table
     textures[TILES] = tiles;
     textures[OBJECTS] = objects;
+    textures[FONT] = fonts;
     
     std::stringstream stream;
     std::stringstream streamLoad;

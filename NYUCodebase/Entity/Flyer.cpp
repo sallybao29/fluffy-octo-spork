@@ -1,4 +1,5 @@
 #include "Flyer.hpp"
+#include "GameUtilities.hpp"
 
 #define ACTIVE_TIME_MAX 5.0f
 
@@ -31,6 +32,7 @@ void Flyer::Update(Entity& target, float elapsed) {
             
             // Start chasing the target if it gets in range
             if (InRange(target) && target.currentAction != ACTION_DEFENDING) {
+                Mix_PlayChannel(-1, sounds["flyer"], 0);
                 state = STATE_CHASING;
             }
             break;
@@ -62,6 +64,7 @@ void Flyer::Update(Entity& target, float elapsed) {
             
             // If the target is detected while returning, return to chasing
             if (InRange(target) && target.currentAction != ACTION_DEFENDING) {
+                Mix_PlayChannel(-1, sounds["flyer"], 0);
                 state = STATE_CHASING;
             }
             // If the base has been reached, remain idle

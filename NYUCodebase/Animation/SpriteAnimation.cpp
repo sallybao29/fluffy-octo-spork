@@ -39,6 +39,11 @@ void SpriteAnimation::Reset() {
     frameIndex = 0;
 }
 
+SheetSprite* SpriteAnimation::GetFrame(int frameNum) {
+    if (frameNum < 0 || frameNum > maxFrames) return nullptr;
+    return &frames[frameNum];
+}
+
 void SpriteAnimation::NextFrame(float elapsed) {
     if (loopStyle == LOOP_NONE) return;
     

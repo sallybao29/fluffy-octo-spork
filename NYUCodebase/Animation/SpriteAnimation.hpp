@@ -65,6 +65,13 @@ public:
      */
     void Reset();
     
+    /*!
+     * @discussion Returns the frame at the given index
+     * @param frameNum The index of the frame
+     * @return A pointer to the sprite for the given frame
+     */
+    SheetSprite* GetFrame(int frameNum);
+    
 private:
     /// The frames that make up the animation
     std::vector<SheetSprite> frames;

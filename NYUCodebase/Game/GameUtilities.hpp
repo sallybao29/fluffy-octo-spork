@@ -18,6 +18,7 @@
 
 #define TILES "tiles"
 #define OBJECTS "objecs"
+#define FONT "font"
 
 class Matrix;
 class Vector3;

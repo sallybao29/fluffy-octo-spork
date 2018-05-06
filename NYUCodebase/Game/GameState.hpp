@@ -129,7 +129,6 @@ private:
     
     Entity* player;
     std::vector<Entity*> entities;
-    std::vector<Entity*> blocks;
     
     int level;
     

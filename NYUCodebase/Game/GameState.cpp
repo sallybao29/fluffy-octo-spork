@@ -117,7 +117,6 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     // Block
     else if (type == "blockBrown") {
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        //blocks.push_back(entity);
         entities.push_back(entity);
         entity->entityType = ENTITY_BLOCK;
         entity->currentAction = ACTION_NONE;
@@ -654,6 +653,24 @@ void GameState::Render() {
         entity.scale.x = mapValue(fabs(entity.velocity.y), 5.0f, 0.0f, 0.8f, 1.0f);
         entity.Render(*shader);
     }
+    
+    // Draw lives
+    float startX = viewX - projection.x * 0.90f;
+    float startY = viewY + projection.y * 0.90f;
+    float dist = map->tileSize;
+    SheetSprite* healthSprite = player->animations[ACTION_DEFENDING]->GetFrame(0);
+    // Unreverse the sprite for rendering
+    bool reversed = healthSprite->reversed;
+    healthSprite->reversed = false;
+    
+    for (int i = 0; i < lives; ++i) {
+        modelMatrix.Identity();
+        modelMatrix.Translate(i * dist + startX, startY, 0.0f);
+        modelMatrix.Scale(0.75f, 0.75f, 0.0f);
+        shader->SetModelMatrix(modelMatrix);
+        healthSprite->Render(*shader);
+    }
+    healthSprite->reversed = reversed;
 }
 
 void GameState::RenderBackground(float viewX, float viewY) {
@@ -677,7 +694,7 @@ void GameState::RenderBackground(float viewX, float viewY) {
     // Draw background hills
     modelMatrix.Identity();
     modelMatrix.SetPosition(viewX + projection.x * 0.25, viewY + projection.y * 0.375 , 0.0f);
-    modelMatrix.Scale(projection.x * 2.5, projection.y * 2.5, 1.0f);
+    modelMatrix.Scale(projection.x * 2.5, projection.y * 3.0, 1.0f);
     shader->SetModelMatrix(modelMatrix);
     stream.str ("");
     stream << "hills_" << level;

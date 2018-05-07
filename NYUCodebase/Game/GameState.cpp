@@ -4,10 +4,10 @@
 #include "Flyer.hpp"
 #include "Floater.hpp"
 
-#define ACCELERATION 1.2f
+#define ACCELERATION 20.0f
 #define VELOCITY_X 0.7f
 #define JUMP_VELOCITY 4.5f
-#define FRICTION 1.0f
+#define FRICTION 0.6f
 #define GRAVITY 4.9f
 
 #define COLLIDE_X 0
@@ -85,7 +85,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->acceleration.y = GRAVITY;
         entity->isStatic = false;
         entities.push_back(entity);
-
+        
         entity->AddAnimation(ACTION_FLYING, "enemyFlying", 3.5, LOOP_REVERSE, 3);
         entity->animations[ACTION_FLYING]->SetSpeed(30);
     }
@@ -97,7 +97,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
         entity->acceleration.y = GRAVITY;
         entity->isStatic = true;
         entities.push_back(entity);
-
+        
         entity->AddAnimation(ACTION_DEFENDING, "enemyFloating_3", 3.5, LOOP_NONE);
         entity->AddAnimation(ACTION_ATTACKING, "enemyFloating_1", 3.5, LOOP_NONE);
     }
@@ -105,7 +105,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (type == "enemyWalking") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entity->acceleration.x = ACCELERATION;
+        entity->velocity.x = VELOCITY_X;
         entity->isStatic = false;
         entities.push_back(entity);
         
@@ -270,11 +270,10 @@ void GameState::ProcessInput() {
                 }
                 level++;
                 LoadLevel();
-                return;
             }
             if (event.key.keysym.scancode == SDL_SCANCODE_R) {
-                // Reset entire game
-                LoadLevel();
+                // Reset level
+                 LoadLevel();
             }
         }
     }
@@ -282,13 +281,16 @@ void GameState::ProcessInput() {
     // Defense form cannot move
     if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->acceleration.x = ACCELERATION;
+            player->velocity.x = VELOCITY_X;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->acceleration.x = -ACCELERATION;
+            player->velocity.x = -VELOCITY_X;
         }
         else {
-            player->acceleration.x = 0.0f;
+            player->velocity.x = 0.0f;
+        }
+        if (fabs(player->velocity.x) > 0 && keys[SDL_SCANCODE_A]) {
+            player->acceleration.x = player->velocity.x > 0 ? ACCELERATION : -ACCELERATION;
         }
     }
     // If jumping, allow left/right velocity to be set
@@ -384,14 +386,17 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 void GameState::CheckForTurn(Entity& entity) {
     int midY = map->worldToTileCoordY(entity.position.y);
     
-    if (entity.acceleration.x < 0) {
+    if (entity.velocity.x < 0) {
         // Pick a point a little to the left of the entity
         int leftX = map->worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 5);
         // If there's something solid to the left, turn around
         if (solidTiles.find(map->mapData[midY][leftX] - 1) != solidTiles.end() ||
             entity.collidedLeft) {
-            entity.acceleration.x *= -1;
+            entity.velocity.x = VELOCITY_X * 0.80;
         }
+        // Otherwise keep going
+        else
+            entity.velocity.x = -VELOCITY_X * 0.80;
     }
     else {
         // Pick a point a little to the right of the entity
@@ -399,8 +404,11 @@ void GameState::CheckForTurn(Entity& entity) {
         // If there's something solid to the right, turn around
         if (solidTiles.find(map->mapData[midY][rightX] - 1) != solidTiles.end() ||
             entity.collidedRight) {
-            entity.acceleration.x *= -1;
+            entity.velocity.x = -VELOCITY_X * 0.80;
         }
+        // Otherwise turn around
+        else
+            entity.velocity.x = VELOCITY_X * 0.80;
     }
 }
 
@@ -470,7 +478,7 @@ void GameState::Update(float elapsed) {
         UpdatePhysics(*entity, elapsed);
         UpdateAnimation(*entity, elapsed);
     }
-
+    
     ResolveEntityCollisions();
     
     CheckTileEvent();
@@ -518,6 +526,7 @@ void GameState::CheckTileEvent() {
     }
     // Check if player falls into fluid
     else if (tileVal == FLUID_RED || tileVal == FLUID_BROWN) {
+        Mix_PlayChannel(-1, sounds["hurt"], 0);
         loseLifeReturn();
     }
 }
@@ -592,7 +601,7 @@ void GameState::ResolveEntityCollisions() {
                         lives--;
                         if (!lives)
                             mode = STATE_GAME_OVER;
-                    
+                        
                         Mix_PlayChannel(-1, sounds["hurt"], 0);
                         return;
                     }
@@ -692,4 +701,3 @@ void GameState::RenderBackground(float viewX, float viewY) {
     stream << "hills_" << level;
     DrawTexture(*shader, textures[stream.str()]);
 }
-

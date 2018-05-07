@@ -35,12 +35,19 @@ void ProcessWinScreeInput() {
         if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
             done = true;
         }
+        else if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+                state.Reset();
+                mode = STATE_TITLE_SCREEN;
+            }
+        }
     }
 }
 
 void RenderWinScreen() {
     viewMatrix.Identity();
     program.SetViewMatrix(viewMatrix);
+    program.SetAlpha(1.0f);
     DrawWords(program, textures[FONT], "YOU WIN!", 0.4f, 0.0f, 0.0f, 0.5f);
     DrawWords(program, textures[FONT], "Weary from your journey,", 0.2f, 0.0f, 0.0f, -0.5f);
     DrawWords(program, textures[FONT], "you finally return home...", 0.2f, 0.0f, 0.0f, -0.7f);
@@ -61,8 +68,11 @@ void ProcessTitleScreenInput() {
 }
 
 void RenderTitleScreen() {
+    program.SetAlpha(1.0f);
     DrawWords(program, textures[FONT], "FLUFFY OCTO", 0.4f, 0.0f, 0.0f, 0.5f);
-    DrawWords(program, textures[FONT], "Press Space to Play", 0.2f, 0.0f, 0.0f, -0.5f);
+    DrawWords(program, textures[FONT], "Press Space to Play", 0.2f, 0.0f, 0.0f, 0.0f);
+    DrawWords(program, textures[FONT], "ARROWS   MOVE", 0.15f, 0.0f, 0.0f, -0.5f);
+    DrawWords(program, textures[FONT], "D   DEFEND", 0.15f, 0.0f, 0.0f, -0.75f);
 }
 
 void ProcessGameOverScreenInput() {
@@ -82,6 +92,7 @@ void ProcessGameOverScreenInput() {
 void RenderGameOver() {
     viewMatrix.Identity();
     program.SetViewMatrix(viewMatrix);
+    program.SetAlpha(1.0f);
     DrawWords(program, textures[FONT], "GAME OVER", 0.4f, 0.0f, 0.0f, 0.5f);
     DrawWords(program, textures[FONT], "Press Start to Play Again", 0.2f, 0.0f, 0.0f, -0.5f);
 }

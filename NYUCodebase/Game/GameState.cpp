@@ -4,10 +4,10 @@
 #include "Flyer.hpp"
 #include "Floater.hpp"
 
-#define ACCELERATION 20.0f
+#define ACCELERATION 1.2f
 #define VELOCITY_X 0.7f
 #define JUMP_VELOCITY 4.5f
-#define FRICTION 0.6f
+#define FRICTION 1.0f
 #define GRAVITY 4.9f
 
 #define COLLIDE_X 0
@@ -105,7 +105,7 @@ void GameState::PlaceEntity(std::string type, float x, float y) {
     else if (type == "enemyWalking") {
         // Create entity at position (entityX, entityY)
         Entity* entity = new Entity(entityX, entityY, Rectangle(0.3, 0.3));
-        entity->velocity.x = VELOCITY_X;
+        entity->acceleration.x = ACCELERATION;
         entity->isStatic = false;
         entities.push_back(entity);
         
@@ -270,10 +270,11 @@ void GameState::ProcessInput() {
                 }
                 level++;
                 LoadLevel();
+                return;
             }
             if (event.key.keysym.scancode == SDL_SCANCODE_R) {
                 // Reset entire game
-                Reset();
+                LoadLevel();
             }
         }
     }
@@ -281,16 +282,13 @@ void GameState::ProcessInput() {
     // Defense form cannot move
     if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
         if (keys[SDL_SCANCODE_RIGHT]) {
-            player->velocity.x = VELOCITY_X;
+            player->acceleration.x = ACCELERATION;
         }
         else if (keys[SDL_SCANCODE_LEFT]) {
-            player->velocity.x = -VELOCITY_X;
+            player->acceleration.x = -ACCELERATION;
         }
         else {
-            player->velocity.x = 0.0f;
-        }
-        if (fabs(player->velocity.x) > 0 && keys[SDL_SCANCODE_A]) {
-            player->acceleration.x = player->velocity.x > 0 ? ACCELERATION : -ACCELERATION;
+            player->acceleration.x = 0.0f;
         }
     }
     // If jumping, allow left/right velocity to be set
@@ -386,17 +384,14 @@ void GameState::UpdateAnimation(Entity& entity, float elapsed) {
 void GameState::CheckForTurn(Entity& entity) {
     int midY = map->worldToTileCoordY(entity.position.y);
     
-    if (entity.velocity.x < 0) {
+    if (entity.acceleration.x < 0) {
         // Pick a point a little to the left of the entity
         int leftX = map->worldToTileCoordX(entity.position.x - (entity.shape->size.x / 2) - map->tileSize / 5);
         // If there's something solid to the left, turn around
         if (solidTiles.find(map->mapData[midY][leftX] - 1) != solidTiles.end() ||
             entity.collidedLeft) {
-            entity.velocity.x = VELOCITY_X * 0.80;
+            entity.acceleration.x *= -1;
         }
-        // Otherwise keep going
-        else
-            entity.velocity.x = -VELOCITY_X * 0.80;
     }
     else {
         // Pick a point a little to the right of the entity
@@ -404,11 +399,8 @@ void GameState::CheckForTurn(Entity& entity) {
         // If there's something solid to the right, turn around
         if (solidTiles.find(map->mapData[midY][rightX] - 1) != solidTiles.end() ||
             entity.collidedRight) {
-            entity.velocity.x = -VELOCITY_X * 0.80;
+            entity.acceleration.x *= -1;
         }
-        // Otherwise turn around
-        else
-            entity.velocity.x = VELOCITY_X * 0.80;
     }
 }
 

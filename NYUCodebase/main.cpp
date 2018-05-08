@@ -41,6 +41,9 @@ void ProcessWinScreeInput() {
                 mode = STATE_TITLE_SCREEN;
                 Mix_PauseMusic();
             }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                done = true;
+            }
         }
     }
 }
@@ -64,6 +67,9 @@ void ProcessTitleScreenInput() {
                 mode = STATE_GAME_LEVEL;
                 Mix_PlayMusic(music, -1);
             }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                done = true;
+            }
         }
     }
 }
@@ -77,8 +83,19 @@ void RenderTitleScreen() {
     DrawTexture(program, textures["sample"], 0.0f, 0.0f, 0.5f, 0.5f);
     DrawWords(program, textures[FONT], "JEFF WAS LOST", 0.4f, 0.0f, 0.0f, 0.5f);
     DrawWords(program, textures[FONT], "Press Space to Play", 0.2f, 0.0f, 0.0f, 0.0f);
-    DrawWords(program, textures[FONT], "ARROWS   MOVE", 0.15f, 0.0f, 0.0f, -0.5f);
-    DrawWords(program, textures[FONT], "D   DEFEND", 0.15f, 0.0f, 0.0f, -0.75f);
+    
+    modelMatrix.Identity();
+    modelMatrix.Translate(-projection.x * 0.25, -0.5f, 0.0f);
+    program.SetModelMatrix(modelMatrix);
+    DrawText(program, textures[FONT], "ARROWS   MOVE", 0.15f, 0.0f);
+    
+    modelMatrix.Translate(0.0f, -0.25f, 0.0f);
+    program.SetModelMatrix(modelMatrix);
+    DrawText(program, textures[FONT], "D        DEFEND", 0.15f, 0.0f);
+    
+    modelMatrix.Translate(0.0f, -0.25f, 0.0f);
+    program.SetModelMatrix(modelMatrix);
+    DrawText(program, textures[FONT], "ESC      EXIT", 0.15f, 0.0f);
 }
 
 void ProcessGameOverScreenInput() {
@@ -90,6 +107,9 @@ void ProcessGameOverScreenInput() {
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
                 mode = STATE_GAME_LEVEL;
                 state.Reset();
+            }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                done = true;
             }
         }
     }
@@ -172,7 +192,7 @@ void LoadSounds() {
     Mix_VolumeChunk(sounds["jump"], 25);
     Mix_VolumeChunk(sounds["hurt"], 25);
     
-    Mix_VolumeMusic(30);
+    Mix_VolumeMusic(35);
     
     music = Mix_LoadMUS(RESOURCE_FOLDER"Resources/Sounds/bgm.mp3");
 }

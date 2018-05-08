@@ -18,7 +18,7 @@ data=
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,122,262,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,134,135,135,135,135,135,135,135,135,135,135,135,135,135,136,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133,133,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,129,0,0,0,0,129,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -144,10 +144,6 @@ location=31,7,1,1
 
 [ObjectsLayer]
 type=enemyFlying
-location=28,9,1,1
-
-[ObjectsLayer]
-type=enemyFlying
 location=26,10,1,1
 
 [ObjectsLayer]
@@ -156,5 +152,49 @@ location=31,10,1,1
 
 [ObjectsLayer]
 type=enemyFlying
-location=26,7,1,1
+location=31,8,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=31,9,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=31,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=26,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=27,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=28,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=29,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=30,6,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=27,10,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=28,10,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=29,10,1,1
+
+[ObjectsLayer]
+type=enemyFlying
+location=30,10,1,1
 

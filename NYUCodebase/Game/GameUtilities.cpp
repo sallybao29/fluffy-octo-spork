@@ -86,12 +86,28 @@ void DrawShape(ShaderProgram& program, const Shape& shape) {
     glDisableVertexAttribArray(program.positionAttribute);
 }
 
-void DrawTexture(ShaderProgram& program, GLuint textureID) {
+void DrawTexture(ShaderProgram& program, GLuint textureID, float u, float v, float width, float height) {
     glBindTexture(GL_TEXTURE_2D, textureID);
-    float vertices[] = {-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5};
+    float vertices[] = {
+        -0.5, -0.5,
+        0.5, 0.5,
+        -0.5, 0.5,
+        0.5, 0.5,
+        -0.5, -0.5,
+        0.5, -0.5
+        
+    };
     glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
     glEnableVertexAttribArray(program.positionAttribute);
-    float texCoords[] = {0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0};
+    GLfloat texCoords[] = {
+        u, v + height,
+        u + width, v,
+        u, v,
+        u + width, v,
+        u, v + height,
+        u + width, v + height
+    };
+    
     glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
     glEnableVertexAttribArray(program.texCoordAttribute);
     glDrawArrays(GL_TRIANGLES, 0, 6);

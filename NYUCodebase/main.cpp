@@ -16,7 +16,7 @@ SDL_Event event;
 bool done = false;
 const Uint8 *keys = SDL_GetKeyboardState(nullptr);
 
-Matrix projectionMatrix, viewMatrix;
+Matrix projectionMatrix, viewMatrix, modelMatrix;
 
 GameMode mode = STATE_TITLE_SCREEN;
 GameState state(&program);
@@ -39,6 +39,7 @@ void ProcessWinScreeInput() {
             if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
                 state.Reset();
                 mode = STATE_TITLE_SCREEN;
+                Mix_PauseMusic();
             }
         }
     }
@@ -49,8 +50,8 @@ void RenderWinScreen() {
     program.SetViewMatrix(viewMatrix);
     program.SetAlpha(1.0f);
     DrawWords(program, textures[FONT], "YOU WIN!", 0.4f, 0.0f, 0.0f, 0.5f);
-    DrawWords(program, textures[FONT], "Weary from your journey,", 0.2f, 0.0f, 0.0f, -0.5f);
-    DrawWords(program, textures[FONT], "you finally return home...", 0.2f, 0.0f, 0.0f, -0.7f);
+    DrawWords(program, textures[FONT], "Weary from his journey,", 0.2f, 0.0f, 0.0f, -0.5f);
+    DrawWords(program, textures[FONT], "Jeff finally returns home...", 0.2f, 0.0f, 0.0f, -0.7f);
 }
 
 void ProcessTitleScreenInput() {
@@ -69,7 +70,12 @@ void ProcessTitleScreenInput() {
 
 void RenderTitleScreen() {
     program.SetAlpha(1.0f);
-    DrawWords(program, textures[FONT], "FLUFFY OCTO", 0.4f, 0.0f, 0.0f, 0.5f);
+    modelMatrix.Identity();
+    modelMatrix.Scale(7.5, 4, 1.0f);
+    program.SetModelMatrix(modelMatrix);
+    
+    DrawTexture(program, textures["sample"], 0.0f, 0.0f, 0.5f, 0.5f);
+    DrawWords(program, textures[FONT], "JEFF WAS LOST", 0.4f, 0.0f, 0.0f, 0.5f);
     DrawWords(program, textures[FONT], "Press Space to Play", 0.2f, 0.0f, 0.0f, 0.0f);
     DrawWords(program, textures[FONT], "ARROWS   MOVE", 0.15f, 0.0f, 0.0f, -0.5f);
     DrawWords(program, textures[FONT], "D   DEFEND", 0.15f, 0.0f, 0.0f, -0.75f);
@@ -194,12 +200,14 @@ void Setup() {
     // Load textures
     GLuint tiles = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/tilesheet_complete.png", GL_NEAREST);
     GLuint objects = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/spritesheet_complete.png", GL_NEAREST);
-    GLuint fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_NEAREST);
+    GLuint fonts = LoadTexture(RESOURCE_FOLDER"Resources/Spritesheets/font1.png", GL_LINEAR);
+    GLuint sample = LoadTexture(RESOURCE_FOLDER"Resources/Sample.png", GL_LINEAR);
     
     // Store texture references in lookup table
     textures[TILES] = tiles;
     textures[OBJECTS] = objects;
     textures[FONT] = fonts;
+    textures["sample"] = sample;
     
     std::stringstream stream;
     std::stringstream streamLoad;

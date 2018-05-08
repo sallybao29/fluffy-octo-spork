@@ -79,7 +79,7 @@ void DrawShape(ShaderProgram& program, const Shape& shape);
  # @param program The shader program to use for rendering
  # @param textureID The id of the texture to render
  */
-void DrawTexture(ShaderProgram& program, GLuint textureID);
+void DrawTexture(ShaderProgram& program, GLuint textureID, float u = 0.0f, float v = 0.0f, float width = 1.0f, float height = 1.0f);
 
 /*!
  * @abstract Converts object space vertices to world space

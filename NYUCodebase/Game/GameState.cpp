@@ -252,8 +252,8 @@ void GameState::ProcessInput() {
         else if (event.type == SDL_KEYDOWN) {
             // Can only jump if ground below is solid
             // Defense form cannot move
-            if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
-                if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+            if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+                if (player->collidedBottom && player->currentAction != ACTION_DEFENDING) {
                     player->velocity.y = JUMP_VELOCITY;
                     player->currentAction = ACTION_JUMPING;
                     // Reset the jumping animation
@@ -262,7 +262,7 @@ void GameState::ProcessInput() {
                     Mix_PlayChannel(-1, sounds["jump"], 0);
                 }
             }
-            if (event.key.keysym.scancode == SDL_SCANCODE_N) {
+            else if (event.key.keysym.scancode == SDL_SCANCODE_N) {
                 // Skip to next level
                 if (level == 3) {
                     mode = STATE_GAME_WON;
@@ -271,9 +271,12 @@ void GameState::ProcessInput() {
                 level++;
                 LoadLevel();
             }
-            if (event.key.keysym.scancode == SDL_SCANCODE_R) {
+            else if (event.key.keysym.scancode == SDL_SCANCODE_R) {
                 // Reset level
                  LoadLevel();
+            }
+            else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                done = true;
             }
         }
     }
